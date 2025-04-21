@@ -40,7 +40,7 @@ try {
         ]);
         
         // Redirection après mise à jour 
-        header('Location: covoiturage.php');
+        header('Location: covoiturage.php?page=proposer');
         exit;
     }
 } catch(Exception $e) {
@@ -80,7 +80,7 @@ try {
 
                 <p><strong>Nombre de places disponibles :</strong> <input type="number" name="placesDisponibles" value="<?= htmlspecialchars($annonce['placesDisponibles']) ?>" required></p>
 
-                <p><strong>Détails :</strong> <textarea name="details" required><?= htmlspecialchars($annonce['details']) ?></textarea></p>
+                <p><strong>Détails :</strong> <textarea name="details" ><?= htmlspecialchars($annonce['details']) ?></textarea></p>
 
                 <button type="submit">Mettre à jour</button>
             </form>
