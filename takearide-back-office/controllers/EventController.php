@@ -1,136 +1,68 @@
 <?php
-// controllers/EventController.php
-
-require_once __DIR__ . '/../models/Event.php';
+require_once '../config.php';
 
 class EventController
 {
-    public function showAddForm()
+    private $pdo;
+
+    public function __construct()
     {
-        include __DIR__ . '/../views/events/add.php';
+        $this->pdo = config::getConnexion();
     }
 
-    public function save()
-    { echo "Dans EventController::save()<br>";
-        print_r($_POST); // pour voir si les données sont bien là
-
-        $titre = $_POST['titre'] ?? '';
-        $description = $_POST['description'] ?? '';
-        $lieu = $_POST['lieu'] ?? '';
-        $date = $_POST['date'] ?? '';
-
-        // Contrôle de saisie
-        if (empty($titre) || empty($description) || empty($lieu) || empty($date)) {
-            $error = "Tous les champs sont obligatoires.";
-            include __DIR__ . '/../includes/header.php';
-            include __DIR__ . '/../views/events/add.php';
-            include __DIR__ . '/../includes/footer.php';
-            return;
-        }
-
-        // Vérification de la date (à partir d'avril 2025)
-        $minDate = strtotime('2025-04-01');
-        $eventDate = strtotime($date);
-
-        if ($eventDate < $minDate) {
-            $error = "La date doit être à partir d'avril 2025.";
-            include __DIR__ . '/../includes/header.php';
-            include __DIR__ . '/../views/events/add.php';
-            include __DIR__ . '/../includes/footer.php';
-            return;
-        }
-
-        $event = new Event();
-        $event->save($titre, $description, $lieu, $date);
-        $_SESSION['flash'] = "Événement ajouté avec succès.";
-
-        header("Location: index.php?action=list");
-        exit();
-    }
-
-
-    public function index()
+    // 🔹 Ajouter un événement
+    public function addEvent($nom, $description, $lieu, $date)
     {
-        $eventModel = new Event();
-        $events = $eventModel->getAll();
-
-        include __DIR__ . '/../includes/header.php';
-        include __DIR__ . '/../views/events/index.php';
-        include __DIR__ . '/../includes/footer.php';
+        $sql = "INSERT INTO event (nom, description, lieu, date) 
+                VALUES (:nom, :description, :lieu, :date)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':nom' => $nom,
+            ':description' => $description,
+            ':lieu' => $lieu,
+            ':date' => $date
+        ]);
     }
 
-    public function edit()
-{
-    $id = $_GET['id'] ?? null;
+    // 🔹 Récupérer tous les événements
+    public function getAllEvents()
+    {
+        $sql = "SELECT * FROM event";
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll();
+    }
 
-    if ($id) {
-        $eventModel = new Event();
-        $event = $eventModel->getById($id);
+    // 🔹 Récupérer un événement par ID
+    public function getEventById($id_event)
+    {
+        $sql = "SELECT * FROM event WHERE id_event = :id_event";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id_event' => $id_event]);
+        return $stmt->fetch();
+    }
 
-        if ($event) {
-            include __DIR__ . '/../includes/header.php';
-            include __DIR__ . '/../views/events/edit.php';
-            include __DIR__ . '/../includes/footer.php';
-        } else {
-            echo "Événement introuvable.";
-        }
-    } else {
-        echo "ID non spécifié.";
+    // 🔹 Mettre à jour un événement
+    public function updateEvent($id_event, $nom, $description, $lieu, $date)
+    {
+        $sql = "UPDATE event 
+                SET nom = :nom, description = :description, lieu = :lieu, date = :date
+                WHERE id_event = :id_event";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':nom' => $nom,
+            ':description' => $description,
+            ':lieu' => $lieu,
+            ':date' => $date,
+            ':id_event' => $id_event
+        ]);
+    }
+
+    // 🔹 Supprimer un événement
+    public function deleteEvent($id_event)
+    {
+        $sql = "DELETE FROM event WHERE id_event = :id_event";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id_event' => $id_event]);
     }
 }
-
-
-public function update()
-{ //echo "Appel de update()<br>";
-   // print_r($_POST); // pour vérifier les valeurs envoyées
-
-    $id = $_POST['id'];
-    $titre = $_POST['titre'];
-    $description = $_POST['description'];
-    $lieu = $_POST['lieu'];
-    $date = $_POST['date'];
-// Contrôle de saisie
-    if (empty($titre) || empty($description) || empty($lieu) || empty($date)) {
-        $error = "Tous les champs sont obligatoires.";
-        $event = compact('id', 'titre', 'description', 'lieu', 'date'); // Pour réafficher le formulaire rempli
-        include __DIR__ . '/../includes/header.php';
-        include __DIR__ . '/../views/events/edit.php';
-        include __DIR__ . '/../includes/footer.php';
-        return;
-    }
-// Vérification de la date (à partir d'avril 2025)
-    $minDate = strtotime('2025-04-15');
-    $eventDate = strtotime($date);
-    if ($eventDate < $minDate) {
-        $error = "La date doit être à partir d'aujourd'hui.";
-        $event = compact('id', 'titre', 'description', 'lieu', 'date');
-        include __DIR__ . '/../includes/header.php';
-        include __DIR__ . '/../views/events/edit.php';
-        include __DIR__ . '/../includes/footer.php';
-        return;
-    }
-
-// Sauvegarde
-    $eventModel = new Event();
-    $eventModel->update($id, $titre, $description, $lieu, $date);
-    $_SESSION['flash'] = "Événement modifié avec succès.";
-
-    header("Location: index.php?action=list");
-    exit();
-}
-
-
-    public function delete()
-    {
-        $id = $_GET['id'] ?? null;
-        if ($id) {
-            $eventModel = new Event();
-            $eventModel->delete($id);
-        }
-        $_SESSION['flash'] = "Événement supprimé avec succès.";
-
-        header("Location: index.php?action=list");
-        exit();
-    }
-
-}
+?>

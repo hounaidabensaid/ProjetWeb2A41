@@ -1,63 +1,91 @@
+<?php
+if (!isset($_SESSION['user'])) {
+    $_SESSION['user'] = [
+        'id' => 3,
+        'nom' => 'Mejri',
+        'prenom' => 'Lina',
+        'email' => 'lina@example.com',
+        'role' => 'client'
+    ];
+}
+
+// Récupérer l'utilisateur
+$user = $_SESSION['user'];
+?>
+
 <div class="container mt-4">
     <div class="row">
-        <?php if (!empty($events)): ?>
+        <?php if (isset($events) && !empty($events)): ?>
             <?php foreach ($events as $event): ?>
                 <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-body d-flex flex-column">
+                    <div class="card shadow">
+                        <div class="card-body">
                             <h5 class="card-title"><?= htmlspecialchars($event['nom']) ?></h5>
-                            <h6 class="card-subtitle mb-2 text-muted">
-                                📍 <?= htmlspecialchars($event['lieu']) ?><br>
-                                📅 <?= htmlspecialchars($event['date']) ?>
-                            </h6>
-                            <p class="card-text flex-grow-1"><?= nl2br(htmlspecialchars($event['description'])) ?></p>
-
-                            <!-- Bouton pour ouvrir le modal -->
-                            <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#reserveModal<?= $event['id_event'] ?>">
+                            <p class="card-text"><?= htmlspecialchars($event['description']) ?></p>
+                            <p><strong>Date:</strong> <?= htmlspecialchars($event['date']) ?></p>
+                            <button class="btn btn-primary" onclick="openConfirmModal(<?= (int)$event['id_event'] ?>)">
                                 Réserver
                             </button>
                         </div>
                     </div>
                 </div>
+
+                <!-- Modal Confirmation DIRECTE -->
+                <div class="modal fade" id="confirmModal<?= (int)$event['id_event'] ?>" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Confirmation Réservation</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>💬 Confirmez-vous votre réservation pour :</p>
+                                <p><strong>Nom :</strong> <?= htmlspecialchars($user['prenom'] . ' ' . $user['nom']) ?></p>
+                                <p><strong>Email :</strong> <?= htmlspecialchars($user['email']) ?></p>
+                                <p><strong>Événement :</strong> <?= htmlspecialchars($event['nom']) ?></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" onclick="submitReservation(<?= (int)$event['id_event'] ?>)">Confirmer</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             <?php endforeach; ?>
         <?php else: ?>
-            <p class="text-center">Aucun événement trouvé.</p>
+            <p>Aucun événement disponible pour le moment.</p>
         <?php endif; ?>
     </div>
 </div>
 
-<!-- 🔽 Tous les modals sont générés ici, séparément des cartes -->
-<?php foreach ($events as $event): ?>
-    <div class="modal fade" id="reserveModal<?= $event['id_event'] ?>" tabindex="-1" aria-labelledby="reserveModalLabel<?= $event['id_event'] ?>" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="index.php?action=storeReservation">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="reserveModalLabel<?= $event['id_event'] ?>">Réserver pour : <?= htmlspecialchars($event['nom']) ?></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" name="id_event" value="<?= $event['id_event'] ?>">
+<!-- JS -->
+<script>
+function openConfirmModal(eventId) {
+    const confirmModal = new bootstrap.Modal(document.getElementById("confirmModal" + eventId));
+    confirmModal.show();
+}
 
-                        <div class="mb-3">
-                            <label for="nom<?= $event['id_event'] ?>" class="form-label">Nom :</label>
-                            <input type="text" class="form-control" name="nom" id="nom<?= $event['id_event'] ?>" required>
-                        </div>
+function submitReservation(eventId) {
+    const formData = new FormData();
+    formData.append("id_event", eventId);
 
-                        <div class="mb-3">
-                            <label for="email<?= $event['id_event'] ?>" class="form-label">Email :</label>
-                            <input type="email" class="form-control" name="email" id="email<?= $event['id_event'] ?>" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Valider</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-<?php endforeach; ?>
-
-<!-- Bootstrap JS nécessaire -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    fetch("http://localhost/yassvf/takearideyas/takearide-front-office/frontoffice/booking.php?action=storeReservation", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.success) {
+            alert("✅ Réservation confirmée !");
+            bootstrap.Modal.getInstance(document.getElementById("confirmModal" + eventId)).hide();
+        } else {
+            alert("❌ Erreur : " + result.error);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("⚠️ Erreur serveur !");
+    });
+}
+</script>

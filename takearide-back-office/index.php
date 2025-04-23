@@ -43,7 +43,7 @@ session_start();
             <h2 class="mb-3">Connexion Admin</h2>
             <div class="mb-3">
                 <label for="username" class="form-label">Nom d'utilisateur</label>
-                <input type="text" class="form-control" name="username" id="username" required>
+                <input type="text" class="form-control" name="username" id="username" >
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Mot de passe</label>
@@ -61,14 +61,14 @@ session_start();
     // Inclure les contrôleurs
     require_once 'controllers/EventController.php';
     require_once 'controllers/ParticipantController.php';
+    require_once 'controllers/ReservationController.php'; // Inclure le contrôleur de réservation
 
     $controller = new EventController();
     $participantController = new ParticipantController();
+    $reservationController = new ReservationController(); // Créer l'objet du contrôleur de réservation
 
     $action = $_GET['action'] ?? 'list';
     $actionHandled = false;
-
-    // echo "<pre>"; print_r($_POST); echo "</pre>";
 
     // Gestion des événements
     switch ($action) {
@@ -129,6 +129,19 @@ session_start();
             $participantController->delete();
             $actionHandled = true;
             break;
+    }
+
+    // Gestion des réservations (AJAX)
+    switch ($action) {
+        case 'storeReservation':
+            // Appeler la méthode pour enregistrer la réservation
+            $reservationController->storeReservation();
+            $actionHandled = true;
+            break;
+    }
+
+    if (!$actionHandled) {
+        echo "<div class='alert alert-danger'>Action inconnue</div>";
     }
     ?>
 </div>

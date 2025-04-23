@@ -1,5 +1,5 @@
 <?php
-require_once 'config/db.php';
+require_once '../config.php';
 
 class Event
 {
@@ -7,44 +7,59 @@ class Event
 
     public function __construct()
     {
-        $this->conn = Database::getConnection();
+        $this->conn = Config::getConnexion();  // Majuscule ici
     }
 
+    // Récupérer tous les événements
     public function getAll()
     {
-        $result = $this->conn->query("SELECT * FROM event");
-        return $result->fetch_all(MYSQLI_ASSOC);
+        $sql = "SELECT * FROM event";
+        $stmt = $this->conn->query($sql);
+        return $stmt->fetchAll();   // En PDO, fetchAll() sans param récupère selon FETCH_ASSOC défini
     }
 
+    // Ajouter un événement
     public function save($nom, $description, $lieu, $date)
     {
-        $stmt = $this->conn->prepare("INSERT INTO event (nom, description, lieu, date) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssss", $nom, $description, $lieu, $date);
-        return $stmt->execute();
+        $sql = "INSERT INTO event (nom, description, lieu, date) VALUES (:nom, :description, :lieu, :date)";
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute([
+            ':nom' => $nom,
+            ':description' => $description,
+            ':lieu' => $lieu,
+            ':date' => $date
+        ]);
     }
 
+    // Récupérer un événement par ID
     public function getById($id)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM event WHERE id_event = ?");
-
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        return $stmt->get_result()->fetch_assoc();
+        $sql = "SELECT * FROM event WHERE id_event = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch();   // fetch() pour une seule ligne
     }
 
+    // Mettre à jour un événement
     public function update($id, $nom, $description, $lieu, $date)
-{
-    $stmt = $this->conn->prepare("UPDATE event SET nom = ?, description = ?, lieu = ?, date = ? WHERE id_event = ?");
-    $stmt->bind_param("ssssi", $nom, $description, $lieu, $date, $id);
-    return $stmt->execute();
-}
+    {
+        $sql = "UPDATE event SET nom = :nom, description = :description, lieu = :lieu, date = :date WHERE id_event = :id";
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute([
+            ':nom' => $nom,
+            ':description' => $description,
+            ':lieu' => $lieu,
+            ':date' => $date,
+            ':id' => $id
+        ]);
+    }
 
-
+    // Supprimer un événement
     public function delete($id)
     {
-        $stmt = $this->conn->prepare("DELETE FROM event WHERE id_event = ?");
-
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
+        $sql = "DELETE FROM event WHERE id_event = :id";
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute([':id' => $id]);
     }
 }
+?>

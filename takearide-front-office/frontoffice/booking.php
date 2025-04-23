@@ -1,3 +1,63 @@
+<?php
+require_once 'controllers/ReservationEventController.php';
+
+session_start();
+$controller = new ReservationEventController();
+$u = $_SESSION['user'];
+    $id = $u['id'];
+	$reservations = $controller->getReservationsByParticipant($id);
+if (isset($_POST['id_reservation'])) {
+    $controller->deleteReservation($_POST['id_reservation']);
+    header("Location: ".$_SERVER['PHP_SELF']);
+    exit();
+}
+
+
+if (isset($_GET['action']) && $_GET['action'] === 'storeReservation') {
+    header('Content-Type: application/json');
+
+    // Vérifie que l'utilisateur est bien en session
+    if (!isset($_SESSION['user'])) {
+        echo json_encode(['success' => false, 'error' => 'Utilisateur non connecté']);
+        exit;
+    }
+
+
+    $user = $_SESSION['user'];
+    $id_participant = $user['id'];
+    $id_event = $_POST['id_event'] ?? null;
+
+    if (!$id_event) {
+        echo json_encode(['success' => false, 'error' => 'Événement manquant']);
+        exit;
+    }
+
+    try {
+        $pdo = new PDO('mysql:host=localhost;dbname=123', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Vérification si déjà réservé (optionnel mais conseillé)
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservationevent WHERE id_participant = ? AND id_event = ?");
+        $stmt->execute([$id_participant, $id_event]);
+        if ($stmt->fetchColumn() > 0) {
+            echo json_encode(['success' => false, 'error' => 'Vous avez déjà réservé cet événement.']);
+            exit;
+        }
+
+        // Insérer la réservation
+        $stmt = $pdo->prepare("INSERT INTO reservationevent (id_participant, id_event) VALUES (?, ?)");
+        $stmt->execute([$id_participant, $id_event]);
+
+        echo json_encode(['success' => true]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => 'Erreur serveur : ' . $e->getMessage()]);
+    }
+	
+	exit;
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -31,6 +91,44 @@
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
 </head>
+
+
+ <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            color: #b30000;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #b30000;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #b30000;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #ffe6e6;
+        }
+        .delete-btn {
+            background-color: #b30000;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .delete-btn:hover {
+            background-color: #ff1a1a;
+        }
+    </style>
+
 
 <body>
     <!-- Spinner Start -->
@@ -130,6 +228,31 @@ require_once 'controllers/EventController.php';
 $controller = new EventController();
 $controller->showCards();?>
 
+<h2 style="text-align:center; color:#b30000; font-family: Arial;">Liste de Mes Réservations</h2>
+
+<table>
+    <tr>
+        <th>ID Réservation</th>
+        <th>Nom de l'Événement</th>
+        <th>Date de Réservation</th>
+        <th>Action</th>
+    </tr>
+    <?php foreach ($reservations as $res) : ?>
+        <tr>
+            <td><?= $res['id_reservation']; ?></td>
+            <td><?= htmlspecialchars($res['nom']); ?></td>
+            <td><?= $res['date_reservation']; ?></td>
+            <td>
+               <form method="POST" style="margin:0;">
+                    <input type="hidden" name="id_reservation" value="<?= $res['id_reservation']; ?>">
+                    <button type="submit" class="delete-btn" onclick="return confirm('Confirmer la suppression ?');">Supprimer</button>
+                </form>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+</table>
+
+
             </div>
         </div>
     </div>
@@ -187,26 +310,6 @@ $controller->showCards();?>
     </div>
     <!-- Booking End -->
 
-
-    <!-- Call To Action Start -->
-    <div class="container-xxl py-5 wow fadeInUp" data-wow-delay="0.1s">
-        <div class="container">
-            <div class="row g-4">
-                <div class="col-lg-8 col-md-6">
-                    <h6 class="text-primary text-uppercase">// Call To Action //</h6>
-                    <h1 class="mb-4">Have Any Pre Booking Question?</h1>
-                    <p class="mb-0">Lorem diam ea sit dolor labore. Clita et dolor erat sed est lorem sed et sit. Diam sed duo magna erat et stet clita ea magna ea sed, sit labore magna lorem tempor justo rebum dolores. Eos dolor sea erat amet et, lorem labore lorem at dolores. Stet ea ut justo et, clita et et ipsum diam.</p>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="bg-primary d-flex flex-column justify-content-center text-center h-100 p-4">
-                        <h3 class="text-white mb-4"><i class="fa fa-phone-alt me-3"></i>+012 345 6789</h3>
-                        <a href="" class="btn btn-secondary py-3 px-5">Contact Us<i class="fa fa-arrow-right ms-3"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Call To Action End -->
 
 
     <!-- Footer Start -->
