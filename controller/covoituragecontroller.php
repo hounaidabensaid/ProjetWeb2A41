@@ -25,6 +25,19 @@ class CovoiturageController
     // Ajouter une annonce
     public function addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details)
     {
+        $data = [
+            'nom' => $nom,
+            'prenom' => $prenom,
+            'villeDepart' => $villeDepart,
+            'villeArrivee' => $villeArrivee,
+            'date' => $date,
+            'prix' => $prix,
+            'matricule' => $matricule,
+            'typeVehicule' => $typeVehicule,
+            'placesDisponibles' => $placesDisponibles,
+            'details' => $details
+        ];
+        $this->validateAnnonceData($data);
         return $this->model->addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details);
     }
 

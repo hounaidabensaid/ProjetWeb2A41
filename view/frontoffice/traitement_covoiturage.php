@@ -1,46 +1,42 @@
 <?php
 session_start();
+require_once __DIR__.'/../../config.php';
+require_once __DIR__.'/../../controller/CovoiturageController.php';
+
 try {
-    $bdd = new PDO('mysql:host=localhost;dbname=123;charset=utf8', 'root', '');
-    $bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(Exception $e) {
-    die('Erreur : '.$e->getMessage());
-}
-// Contrôle de saisie
-if ($_POST['villeDepart'] === $_POST['villeArrivee']) {
-    $_SESSION['erreur'] = "La ville de départ ne peut pas être la même que la ville d'arrivée.";
+    $pdo = Config::getConnexion();
+    $controller = new CovoiturageController($pdo);
 
-    // Sauvegarde des autres champs sauf villes
-    $_SESSION['form_data'] = [
-        'nom' => $_POST['nom'],
-        'prenom' => $_POST['prenom'],
-        'date' => $_POST['date'],
-        'prix' => $_POST['prix'],
-        'matricule' => $_POST['matricule'],
-        'typeVehicule' => $_POST['typeVehicule'],
-        'placesDisponibles' => $_POST['placesDisponibles'],
-        'details' => $_POST['details']
-    ];
+    // Simple validation for villeDepart != villeArrivee
+    if ($_POST['villeDepart'] === $_POST['villeArrivee']) {
+        $_SESSION['erreur'] = "La ville de départ ne peut pas être la même que la ville d'arrivée.";
+        $_SESSION['form_data'] = $_POST;
+        header('Location: covoiturage.php');
+        exit;
+    }
 
+    // Use controller to add annonce with validation
+    $controller->addAnnonce(
+        $_POST['nom'],
+        $_POST['prenom'],
+        $_POST['villeDepart'],
+        $_POST['villeArrivee'],
+        $_POST['date'],
+        $_POST['prix'],
+        $_POST['matricule'],
+        $_POST['typeVehicule'],
+        $_POST['placesDisponibles'],
+        $_POST['details']
+    );
+
+    $_SESSION['success'] = "Annonce ajoutée avec succès.";
+    header('Location: covoiturage.php');
+    exit;
+
+} catch (Exception $e) {
+    $_SESSION['erreur'] = "Erreur lors de l'ajout de l'annonce : " . $e->getMessage();
+    $_SESSION['form_data'] = $_POST;
     header('Location: covoiturage.php');
     exit;
 }
-$req = $bdd->prepare('INSERT INTO `123` (nom, prenom, villeDepart, villeArrivee, date, prix, matricule, typeVehicule, placesDisponibles, details) 
-                      VALUES (:nom, :prenom, :villeDepart, :villeArrivee, :date, :prix, :matricule, :typeVehicule, :placesDisponibles, :details)');
-
-$req->execute(array(
-    'nom' => $_POST['nom'],
-    'prenom' => $_POST['prenom'],
-    'villeDepart' => $_POST['villeDepart'],
-    'villeArrivee' => $_POST['villeArrivee'],
-    'date' => $_POST['date'],
-    'prix' => $_POST['prix'],
-    'matricule' => $_POST['matricule'],
-    'typeVehicule' => $_POST['typeVehicule'],
-    'placesDisponibles' => $_POST['placesDisponibles'],
-    'details' => $_POST['details']
-));
-
-$_SESSION['success'] = "Annonce ajoutée avec succès.";
-header('Location: covoiturage.php');
 ?>

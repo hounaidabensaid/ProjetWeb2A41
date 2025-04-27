@@ -445,38 +445,38 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 die('Erreur : '.$e->getMessage());
             }
 
-            $reponse = $bdd->query('SELECT * FROM `123` ORDER BY date DESC');
+$reponse = $bdd->query('SELECT * FROM `123` WHERE date >= CURDATE() ORDER BY date DESC');
 
-            if ($reponse->rowCount() == 0) {
-                echo '<p class="text-gray-500 text-center">Aucune annonce publiée pour le moment</p>';
-            } else {
-                while ($annonce = $reponse->fetch()) {
-                    echo '
-                    <div class="annonce">
-                        <div class="annonce-header">
-                            <div class="annonce-title">
-                                '.htmlspecialchars($annonce['villeDepart']).' → '.htmlspecialchars($annonce['villeArrivee']).'
-                            </div>
-                            <div class="annonce-actions">
-                                <button onclick="editAnnonce('.$annonce['id'].')" class="btn-action btn-edit">✏️ Modifier</button>
-                                <button onclick="deleteAnnonce('.$annonce['id'].')" class="btn-action btn-delete">🗑️ Supprimer</button>
-                                <a href="demande_covoiturage.php?id=' . $annonce['id'] . '" class="btn-action btn-request">🚗 Demande de covoiturage</a>
-                            </div>
-                        </div>
-                        <div class="annonce-details">
-                            <div class="annonce-info"><strong>Date:</strong> '.htmlspecialchars($annonce['date']).'</div>
-                            <div class="annonce-info"><strong>Prix:</strong> '.htmlspecialchars($annonce['prix']).' D</div>
-                            <div class="annonce-info"><strong>Places:</strong> '.htmlspecialchars($annonce['placesDisponibles']).'</div>
-                            <div class="annonce-info"><strong>Conducteur:</strong> '.htmlspecialchars($annonce['prenom']).' '.htmlspecialchars($annonce['nom']).'</div>
-                        </div>
-                        <div class="annonce-info"><strong>Véhicule:</strong> '.htmlspecialchars($annonce['typeVehicule']).' ('.htmlspecialchars($annonce['matricule']).')</div>';
-                    
-                    if (!empty($annonce['details'])) {
-                        echo '<div class="annonce-info" style="margin-top: 0.5rem;"><strong>Détails:</strong> '.htmlspecialchars($annonce['details']).'</div>';
-                    }
-                    echo '</div>';
-                }
-            }
+if ($reponse->rowCount() == 0) {
+    echo '<p class="text-gray-500 text-center">Aucune annonce publiée pour le moment</p>';
+} else {
+    while ($annonce = $reponse->fetch()) {
+        echo '
+        <div class="annonce">
+            <div class="annonce-header">
+                <div class="annonce-title">
+                    '.htmlspecialchars($annonce['villeDepart']).' → '.htmlspecialchars($annonce['villeArrivee']).'
+                </div>
+                <div class="annonce-actions">
+                    <button onclick="editAnnonce('.$annonce['id'].')" class="btn-action btn-edit">✏️ Modifier</button>
+                    <button onclick="deleteAnnonce('.$annonce['id'].')" class="btn-action btn-delete">🗑️ Supprimer</button>
+                    <a href="demande_covoiturage.php?id=' . $annonce['id'] . '" class="btn-action btn-request">🚗 Demande de covoiturage</a>
+                </div>
+            </div>
+            <div class="annonce-details">
+                <div class="annonce-info"><strong>Date:</strong> '.htmlspecialchars($annonce['date']).'</div>
+                <div class="annonce-info"><strong>Prix:</strong> '.htmlspecialchars($annonce['prix']).' D</div>
+                <div class="annonce-info"><strong>Places:</strong> '.htmlspecialchars($annonce['placesDisponibles']).'</div>
+                <div class="annonce-info"><strong>Conducteur:</strong> '.htmlspecialchars($annonce['prenom']).' '.htmlspecialchars($annonce['nom']).'</div>
+            </div>
+            <div class="annonce-info"><strong>Véhicule:</strong> '.htmlspecialchars($annonce['typeVehicule']).' ('.htmlspecialchars($annonce['matricule']).')</div>';
+        
+        if (!empty($annonce['details'])) {
+            echo '<div class="annonce-info" style="margin-top: 0.5rem;"><strong>Détails:</strong> '.htmlspecialchars($annonce['details']).'</div>';
+        }
+        echo '</div>';
+    }
+}
             ?>
         </div>
     </section>
