@@ -223,10 +223,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'storeReservation') {
         <div class="container">
             <div class="row g-4">
             <?php
-require_once 'controllers/EventController.php';
-
-$controller = new EventController();
-$controller->showCards();?>
+            require_once 'controllers/EventController.php';
+            $controller = new EventController();
+            $controller->showCards();?>
 
 <h2 style="text-align:center; color:#b30000; font-family: Arial;">Liste de Mes Réservations</h2>
 

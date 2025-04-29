@@ -12,6 +12,35 @@ if (!isset($_SESSION['user'])) {
 // Récupérer l'utilisateur
 $user = $_SESSION['user'];
 ?>
+<form method="GET" class="mb-4">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="search" class="form-label">🔍 Rechercher :</label>
+            <input type="text" name="search" id="search" class="form-control" placeholder="Nom ou description"
+                value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+        </div>
+        <div class="col-md-3">
+            <label for="sort" class="form-label">Trier par :</label>
+            <select class="form-select" id="sort" name="sort">
+                <option value="">-- Sélectionner --</option>
+                <option value="nom" <?= (isset($_GET['sort']) && $_GET['sort'] === 'nom') ? 'selected' : '' ?>>Nom</option>
+                <option value="date" <?= (isset($_GET['sort']) && $_GET['sort'] === 'date') ? 'selected' : '' ?>>Date</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="order" class="form-label">Ordre :</label>
+            <select class="form-select" id="order" name="order">
+                <option value="asc" <?= (isset($_GET['order']) && $_GET['order'] === 'asc') ? 'selected' : '' ?>>Croissant</option>
+                <option value="desc" <?= (isset($_GET['order']) && $_GET['order'] === 'desc') ? 'selected' : '' ?>>Décroissant</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+        </div>
+    </div>
+</form>
+
+
 
 <div class="container mt-4">
     <div class="row">
