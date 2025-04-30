@@ -19,18 +19,26 @@ if (isset($_GET['edit'])) {
     $reservationToEdit = $reservationCtrl->getReservationById(intval($_GET['edit']));
 }
 
-// Traitement POST : Ajouter ou Modifier
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!empty($_POST['id_event']) && !empty($_POST['id_participant'])) {
+    // Handle Add/Update Reservation
+    if (isset($_POST['id_event'], $_POST['id_participant'])) {
         if (!empty($_POST['id_reservation'])) {
-            // Modification
             $reservationCtrl->updateReservation($_POST['id_reservation'], $_POST['id_event'], $_POST['id_participant']);
         } else {
-            // Ajout
             $reservationCtrl->addReservation($_POST['id_event'], $_POST['id_participant']);
         }
         header("Location: reservation_event.php");
         exit();
+    }
+    // Handle Status Update
+    elseif (isset($_POST['id_reservation'], $_POST['new_status'])) {
+        try {
+            $reservationCtrl->updateStatus($_POST['id_reservation'], $_POST['new_status']);
+            header("Location: reservation_event.php");
+            exit();
+        } catch (Exception $e) {
+            $error = "Erreur : " . $e->getMessage();
+        }
     }
 }
 
@@ -288,6 +296,7 @@ if (isset($_GET['delete'])) {
                                             <th>Événement</th>
                                             <th>Participant</th>
                                             <th>Date Réservation</th>
+                                            <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -300,6 +309,48 @@ if (isset($_GET['delete'])) {
                                                     <td><?= htmlspecialchars($res['nom_event']) ?></td>
                                                     <td><?= htmlspecialchars($res['nom_user']) . ' ' . htmlspecialchars($res['prenom_user']) ?></td>
                                                     <td><?= htmlspecialchars($res['date_reservation']) ?></td>
+                                                    <td>
+                                                        <?php if ($res['status'] === 'pending') : ?>
+                                                            <div class="d-flex gap-2">
+                                                                <form method="POST" action="reservation_event.php" class="flex-grow-1">
+                                                                    <input type="hidden" name="id_reservation" value="<?= $res['id_reservation'] ?>">
+                                                                    <input type="hidden" name="new_status" value="approved">
+                                                                    <button type="submit" class="btn btn-success btn-sm w-100">
+                                                                        <i class="fas fa-check-circle me-1"></i>Approuver
+                                                                    </button>
+                                                                </form>
+                                                                <form method="POST" action="reservation_event.php" class="flex-grow-1">
+                                                                    <input type="hidden" name="id_reservation" value="<?= $res['id_reservation'] ?>">
+                                                                    <input type="hidden" name="new_status" value="declined">
+                                                                    <button type="submit" class="btn btn-danger btn-sm w-100">
+                                                                        <i class="fas fa-times-circle me-1"></i>Refuser
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        <?php elseif ($res['status'] === 'approved') : ?>
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <span class="badge bg-success bg-opacity-25 text-success">
+                                                                    <i class="fas fa-check me-1"></i>Approuvée
+                                                                </span>
+                                                                <form method="POST" action="reservation_event.php" class="ms-auto">
+                                                                    <input type="hidden" name="id_reservation" value="<?= $res['id_reservation'] ?>">
+                                                                    <input type="hidden" name="new_status" value="cancelled">
+                                                                    <button type="submit" class="btn btn-outline-warning btn-sm">
+                                                                        <i class="fas fa-ban me-1"></i>Annuler
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        <?php elseif ($res['status'] === 'declined') : ?>
+                                                            <span class="badge bg-danger bg-opacity-25 text-danger">
+                                                                <i class="fas fa-times me-1"></i>Refusée
+                                                            </span>
+                                                        <?php elseif ($res['status'] === 'cancelled') : ?>
+                                                            <span class="badge bg-secondary bg-opacity-25 text-secondary">
+                                                                <i class="fas fa-ban me-1"></i>Annulée
+                                                            </span>
+                                                        <?php endif; ?>
+                                                    </td>
+
                                                     <td class="action-btns">
                                                         <a href="?delete=<?= $res['id_reservation'] ?>" onclick="return confirm('Confirmer la suppression ?')" class="btn btn-sm btn-outline-danger">
                                                             <i class="fas fa-trash"></i>

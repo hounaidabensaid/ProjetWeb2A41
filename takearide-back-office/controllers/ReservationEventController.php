@@ -26,7 +26,8 @@ class ReservationEventController
                    e.nom AS nom_event, 
                    u.nom AS nom_user, 
                    u.prenom AS prenom_user, 
-                   re.date_reservation
+                   re.date_reservation,
+                   re.status
             FROM reservationevent re
             JOIN event e ON re.id_event = e.id_event
             JOIN user u ON re.id_participant = u.id";
@@ -74,6 +75,25 @@ class ReservationEventController
     return $stmt->fetchAll();
 }
 
+
+        public function updateStatus($id_reservation, $new_status)
+    {
+        // List of valid statuses
+        $validStatuses = ['pending', 'approved', 'declined', 'cancelled'];
+
+        // Validate the new status
+        if (!in_array($new_status, $validStatuses)) {
+            throw new InvalidArgumentException("Statut non valide.");
+        }
+
+        // SQL query to update the status
+        $sql = "UPDATE reservationevent SET status = :status WHERE id_reservation = :id_reservation";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':status' => $new_status,
+            ':id_reservation' => $id_reservation
+        ]);
+    }
 
 }
 ?>
