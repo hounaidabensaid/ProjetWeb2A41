@@ -5,7 +5,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Formulaire de Réclamation - ShareRide</title>
+    <title>Formulaire de Réclamation - Share a ride</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -76,7 +76,7 @@
             <div class="col-lg-7 px-5 text-start">
                 <div class="h-100 d-inline-flex align-items-center py-3 me-4">
                     <small class="fa fa-map-marker-alt text-primary me-2"></small>
-                    <small>123 Rue de Paris, France</small>
+                    <small>123 Rue de Marseille, Tunis</small>
                 </div>
                 <div class="h-100 d-inline-flex align-items-center py-3">
                     <small class="far fa-clock text-primary me-2"></small>
@@ -86,7 +86,7 @@
             <div class="col-lg-5 px-5 text-end">
                 <div class="h-100 d-inline-flex align-items-center py-3 me-4">
                     <small class="fa fa-phone-alt text-primary me-2"></small>
-                    <small>+33 6 12 34 56 78</small>
+                    <small>+216 99 245 854</small>
                 </div>
             </div>
         </div>
@@ -96,7 +96,7 @@
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
         <a href="index.html" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
-            <h2 class="m-0 text-primary"><i class="fa fa-car me-3"></i>ShareRide</h2>
+            <h2 class="m-0 text-primary"><i class="fa fa-car me-3"></i>Share a ride</h2>
         </a>
         <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
             <span class="navbar-toggler-icon"></span>
@@ -233,8 +233,8 @@
             <div class="row g-5">
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-light mb-4">Adresse</h4>
-                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>123 Rue de Paris, France</p>
-                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+33 6 12 34 56 78</p>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>123 Rue de Marseille, Tunis</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+216 99 245 854</p>
                     <p class="mb-2"><i class="fa fa-envelope me-3"></i>reclamations@shareride.fr</p>
                 </div>
                 <div class="col-lg-3 col-md-6">
@@ -262,7 +262,7 @@
             <div class="copyright">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        © <a class="border-bottom" href="#">ShareRide</a>, Tous droits réservés.
+                        © <a class="border-bottom" href="#">Share a ride</a>, Tous droits réservés.
                     </div>
                 </div>
             </div>

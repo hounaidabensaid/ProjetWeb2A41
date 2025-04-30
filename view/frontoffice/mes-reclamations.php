@@ -10,7 +10,7 @@ $reclamations = $controller->getReclamations();
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Mes Réclamations - ShareRide</title>
+    <title>Mes Réclamations - Share a ride</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -180,7 +180,7 @@ $reclamations = $controller->getReclamations();
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
         <a href="index.html" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
-            <h2 class="m-0 text-primary"><i class="fa fa-car me-3"></i>ShareRide</h2>
+            <h2 class="m-0 text-primary"><i class="fa fa-car me-3"></i>Share a ride</h2>
         </a>
         <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
             <span class="navbar-toggler-icon"></span>
@@ -348,7 +348,7 @@ $reclamations = $controller->getReclamations();
             <div class="copyright">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        © <a class="border-bottom" href="#">ShareRide</a>, Tous droits réservés.
+                        © <a class="border-bottom" href="#">Share a ride</a>, Tous droits réservés.
                     </div>
                 </div>
             </div>
