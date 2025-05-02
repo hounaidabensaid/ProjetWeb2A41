@@ -75,8 +75,7 @@ class ReservationEventController
     return $stmt->fetchAll();
 }
 
-
-        public function updateStatus($id_reservation, $new_status)
+    public function updateStatus($id_reservation, $new_status)
     {
         // List of valid statuses
         $validStatuses = ['pending', 'approved', 'declined', 'cancelled'];
@@ -86,6 +85,20 @@ class ReservationEventController
             throw new InvalidArgumentException("Statut non valide.");
         }
 
+        // First, get the participant's email before updating
+        $emailQuery = "SELECT u.email 
+                    FROM reservationevent r
+                    JOIN user u ON r.id_participant = u.id
+                    WHERE r.id_reservation = :id_reservation";
+        
+        $emailStmt = $this->pdo->prepare($emailQuery);
+        $emailStmt->execute([':id_reservation' => $id_reservation]);
+        $participantEmail = $emailStmt->fetchColumn();
+
+        if (!$participantEmail) {
+            throw new Exception("Email du participant non trouvé.");
+        }
+
         // SQL query to update the status
         $sql = "UPDATE reservationevent SET status = :status WHERE id_reservation = :id_reservation";
         $stmt = $this->pdo->prepare($sql);
@@ -93,6 +106,20 @@ class ReservationEventController
             ':status' => $new_status,
             ':id_reservation' => $id_reservation
         ]);
+
+        // Only send email if status is approved
+        if ($new_status === 'approved') {
+            // Include the sendmail.php file
+            require_once __DIR__ . '/../views/sendmail.php';
+        
+            // Call the sendConfirmationEmail function
+            $result = sendConfirmationEmail($participantEmail);
+            if (!$result['success']) {
+                throw new Exception("Erreur lors de l'envoi du mail: " . $result['message']);
+            }
+        }
+
+        return true;
     }
 
 }
