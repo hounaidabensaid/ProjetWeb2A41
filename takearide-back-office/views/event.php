@@ -29,19 +29,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($_POST['description']);
     $lieu = trim($_POST['lieu']);
     $date = $_POST['date'];
+    
+    // Gestion du fichier image
+    $imagePath = null;
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $targetDir = "/../../image/";  // un dossier
+        $imagePath = "git_version/ProjetWeb2A41/image/" . $imageName;
 
-    if (!empty($nom) && !empty($description) && !empty($lieu) && !empty($date)) {
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0755, true);
+        }
+
+        $imageName = time() . "_" . basename($_FILES['image']['name']);
+        $targetFile = $targetDir . $imageName;
+
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
+            $imagePath = "git_version/ProjetWeb2A41/image/" . $imageName;
+        } else {
+            echo "Erreur lors de l'upload de l'image.";
+            exit();
+        }
+    }
+
+    if (!empty($nom) && !empty($description) && !empty($lieu) && !empty($date) && !empty($imagePath)) {
         if (!empty($_POST['id_event'])) {
             // Mise à jour
             $id_event = intval($_POST['id_event']);
-            $success = $eventModel->update($id_event, $nom, $description, $lieu, $date);
+            $success = $eventModel->update($id_event, $nom, $description, $lieu, $date, $imagePath);
+            
             if ($success) {
                 header("Location: event.php");
                 exit();
             }
         } else {
             // Insertion
-            $success = $eventModel->save($nom, $description, $lieu, $date);
+            $success = $eventModel->save($nom, $description, $lieu, $date, $imagePath);
             if ($success) {
                 header("Location: event.php");
                 exit();
@@ -237,8 +259,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <h5 class="mb-0"><?= isset($eventToEdit) ? 'Modifier' : 'Ajouter' ?> un Événement</h5>
                         </div>
                         <div class="card-body">
-                            <form method="POST" id="event-form" novalidate>
-                                <input type="hidden" name="id_event" value="<?= $eventToEdit['id_event'] ?? '' ?>">
+                        <form method="POST" id="event-form" enctype="multipart/form-data" novalidate>
+                        <input type="hidden" name="id_event" value="<?= $eventToEdit['id_event'] ?? '' ?>">
+                                
+                                <input type="file" name="image">
 
                                 <div class="mb-3">
                                     <label for="nom" class="form-label">Nom de l'Événement</label>
@@ -290,6 +314,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
+                                            <th>Image</th>
                                             <th>Nom</th>
                                             <th>Lieu</th>
                                             <th>Date</th>
@@ -301,7 +326,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <tr><td colspan="4" class="text-center">Aucun événement enregistré</td></tr>
                                         <?php else: ?>
                                             <?php foreach ($events as $e): ?>
-                                                <tr>
+                                            <tr>
+                                                <td>
+                                                    <?php if (!empty($e['image'])): ?>
+                                                        <img src="<?= htmlspecialchars($e['image']) ?>" alt="image" width="80" height="60" style="object-fit: cover; border-radius: 5px;">
+                                                    <?php else: ?>
+                                                        <span class="text-muted">Aucune</span>
+                                                    <?php endif; ?>
+                                                </td>
+
                                                     <td><?= htmlspecialchars($e['nom']) ?></td>
                                                     <td><?= htmlspecialchars($e['lieu']) ?></td>
                                                     <td><?= htmlspecialchars($e['date']) ?></td>

@@ -270,6 +270,7 @@ if (isset($_GET['delete'])) {
         <i class="fas fa-save me-2"></i><?= $reservationToEdit ? 'Modifier' : 'Ajouter' ?>
     </button>
 
+
     <?php if ($reservationToEdit): ?>
         <a href="reservation_event.php" class="btn btn-outline-secondary w-100 mt-2">
             <i class="fas fa-times me-2"></i>Annuler
@@ -280,6 +281,7 @@ if (isset($_GET['delete'])) {
                         </div>
                     </div>
                 </div>
+                    
 
                 <!-- Liste des Réservations -->
                 <div class="col-lg-7">
@@ -369,9 +371,13 @@ if (isset($_GET['delete'])) {
                     </div>
                 </div>
 
+
             </div>
         </div>
-    </div>
+    </div>    
+<form method="post" action="export_pdf.php">
+    <button type="submit" name="export_pdf" class="btn btn-primary w-100">Exporter en PDF</button>
+</form>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

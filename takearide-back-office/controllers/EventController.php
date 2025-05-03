@@ -11,16 +11,17 @@ class EventController
     }
 
     // 🔹 Ajouter un événement
-    public function addEvent($nom, $description, $lieu, $date)
+    public function addEvent($nom, $description, $lieu, $date, $image)
     {
-        $sql = "INSERT INTO event (nom, description, lieu, date) 
-                VALUES (:nom, :description, :lieu, :date)";
+        $sql = "INSERT INTO event (nom, description, lieu, date, image) 
+                VALUES (:nom, :description, :lieu, :date, :image)";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             ':nom' => $nom,
             ':description' => $description,
             ':lieu' => $lieu,
-            ':date' => $date
+            ':date' => $date,
+            ':image' => $image
         ]);
     }
 
@@ -42,10 +43,10 @@ class EventController
     }
 
     // 🔹 Mettre à jour un événement
-    public function updateEvent($id_event, $nom, $description, $lieu, $date)
+    public function updateEvent($id_event, $nom, $description, $lieu, $date, $image)
     {
         $sql = "UPDATE event 
-                SET nom = :nom, description = :description, lieu = :lieu, date = :date
+                SET nom = :nom, description = :description, lieu = :lieu, date = :date, image = :image 
                 WHERE id_event = :id_event";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
@@ -53,7 +54,8 @@ class EventController
             ':description' => $description,
             ':lieu' => $lieu,
             ':date' => $date,
-            ':id_event' => $id_event
+            ':id_event' => $id_event,
+            ':image' => $image
         ]);
     }
 

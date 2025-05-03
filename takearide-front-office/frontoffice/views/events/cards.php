@@ -51,6 +51,9 @@ $user = $_SESSION['user'];
                         <div class="card-body">
                             <h5 class="card-title"><?= htmlspecialchars($event['nom']) ?></h5>
                             <p class="card-text"><?= htmlspecialchars($event['description']) ?></p>
+                            
+                            <img src="<?= htmlspecialchars($event['image']) ?>" alt="Image de l'événement" style="width:100%; height:auto;">
+
                             <p><strong>Date:</strong> <?= htmlspecialchars($event['date']) ?></p>
                             <button class="btn btn-primary" onclick="openConfirmModal(<?= (int)$event['id_event'] ?>)">
                                 Réserver
