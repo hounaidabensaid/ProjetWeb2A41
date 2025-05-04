@@ -3,7 +3,7 @@ require_once __DIR__ . '/../model/CovoiturageModel.php';
 
 class CovoiturageController
 {
-    private $model;
+    private $model; 
 
     public function __construct($pdo)
     {
@@ -194,6 +194,16 @@ class CovoiturageController
         }
 
         return $updated;
+    }
+    // Méthode pour récupérer les statistiques des villes de départ et d'arrivée
+    public function getStatsVille()
+    {
+        $statsDepart = $this->model->getStatsByVilleDepart();
+        $statsArrivee = $this->model->getStatsByVilleArrivee();
+        return [
+            'depart' => $statsDepart,
+            'arrivee' => $statsArrivee
+        ];
     }
 }
 ?>

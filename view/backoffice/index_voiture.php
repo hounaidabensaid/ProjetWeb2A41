@@ -113,6 +113,7 @@ try {
             <li><a href="#"><i class="fas fa-chart-line"></i> Dashboard</a></li>
             <li><a href="#"><i class="fas fa-users"></i> Utilisateurs</a></li>
             <li><a href="index_voiture.php" class="active"><i class="fas fa-car"></i> Gestion covoiturage</a></li>
+            <li><a href="statistiques_villes_controller.php"><i class="fas fa-chart-bar"></i> Statistiques villes</a></li>
             <li><a href="#"><i class="fas fa-calendar-check"></i> Réservations</a></li>
             <li><a href="#"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
         </ul>

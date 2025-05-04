@@ -113,5 +113,20 @@ class CovoiturageModel
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([$nom, $prenom, $telephone, $email, $places, $id_demande]);
     }
+    // Statistiques par ville de départ
+    public function getStatsByVilleDepart()
+    {
+        $sql = "SELECT villeDepart, COUNT(*) as total FROM `123` GROUP BY villeDepart ORDER BY total DESC";
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Statistiques par ville d'arrivée
+    public function getStatsByVilleArrivee()
+    {
+        $sql = "SELECT villeArrivee, COUNT(*) as total FROM `123` GROUP BY villeArrivee ORDER BY total DESC";
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>
