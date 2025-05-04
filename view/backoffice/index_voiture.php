@@ -134,12 +134,11 @@ try {
 
             <div class="search-bar mb-3">
                 <form method="post" class="d-flex">
-                    <input type="text" name="search" value="<?= isset($_POST['search']) ? htmlspecialchars($_POST['search']) : '' ?>" placeholder="Rechercher...">
-                    <button type="submit" class="ms-2">Rechercher</button>
+                    <input type="text" id="searchInput" name="search" value="<?= isset($_POST['search']) ? htmlspecialchars($_POST['search']) : '' ?>" placeholder="Rechercher..." class="form-control" />
+                    <button type="submit" class="ms-2 btn btn-primary">Rechercher</button>
                 </form>
             </div>
-
-            <div class="table-responsive">
+            <div id="annoncesTableWrapper">
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
@@ -156,7 +155,7 @@ try {
                             <th>Demandes</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="annoncesTableBody">
                         <?php if (count($annonces) > 0): ?>
                             <?php foreach ($annonces as $annonce): ?>
                                 <tr>
@@ -178,6 +177,10 @@ try {
                         <?php endif; ?>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="table-responsive">
+                <!-- Removed duplicate table display -->
             </div>
         </div>
     </div>

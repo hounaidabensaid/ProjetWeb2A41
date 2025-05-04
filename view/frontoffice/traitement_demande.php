@@ -41,7 +41,7 @@ try {
         throw new Exception("Format d'email invalide");
     }
 
-    // Validate telephone: exactly 8 digits
+    // Validate telephone:  8 digits
     if (!preg_match('/^\d{8}$/', $_POST['telephone'])) {
         throw new Exception("Le numéro de téléphone doit contenir exactement 8 chiffres");
     }
@@ -61,24 +61,26 @@ try {
     } catch (Exception $ex) {
         error_log("Erreur lors de l'ajout de la demande: " . $ex->getMessage());
         $_SESSION['erreur'] = "Erreur lors de l'ajout de la demande: " . $ex->getMessage();
-        header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '../view/frontoffice/index.php'));
+        $_SESSION['form_data'] = $_POST;
+        header("Location: /web/view/frontoffice/demande_covoiturage.php?id=" . $_POST['id_annonce']);
         exit;
     }
 
     // 9. Succès
     $_SESSION['success'] = "Votre demande a été enregistrée avec succès (ID: $demandeId)";
-    header("Location: /web/view/frontoffice/voir_demandes.php?annonce_id=" . $_POST['id_annonce']);
+    header("Location: /web/view/frontoffice/demande_covoiturage.php?id=" . $_POST['id_annonce']);
     exit;
+
 
 } catch (PDOException $e) {
     error_log("Erreur base de données : " . $e->getMessage());
     $_SESSION['erreur'] = "Erreur technique. Veuillez réessayer plus tard.";
-    header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '../view/frontoffice/index.php'));
+    header("Location: /web/view/frontoffice/demande_covoiturage.php?id=" . ($_POST['id_annonce'] ?? ''));
     exit;
 } catch (Exception $e) {
     error_log("Erreur de traitement : " . $e->getMessage());
     $_SESSION['erreur'] = $e->getMessage();
-    header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '../view/frontoffice/index.php'));
+    header("Location: /web/view/frontoffice/demande_covoiturage.php?id=" . ($_POST['id_annonce'] ?? ''));
     exit;
 }
 ?>

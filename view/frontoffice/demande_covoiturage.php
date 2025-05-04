@@ -6,6 +6,9 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $id_annonce = (int)$_GET['id'];
 ?>
 
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -66,9 +69,37 @@ $id_annonce = (int)$_GET['id'];
         button[type="submit"]:hover {
             background-color: #cc0000;
         }
+        .message {
+            max-width: 600px;
+            margin: 0 auto 1rem auto;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        .message.error {
+            background-color: #ff4d4d;
+            color: #fff;
+            box-shadow: 0 0 10px #ff0000;
+        }
+        .message.success {
+            background-color: #4CAF50;
+            color: #fff;
+            box-shadow: 0 0 10px #2e7d32;
+        }
     </style>
 </head>
 <body>
+    <?php if (isset($_SESSION['erreur'])): ?>
+        <div class="message error">
+            <?= $_SESSION['erreur']; unset($_SESSION['erreur']); ?>
+        </div>
+    <?php endif; ?>
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="message success">
+            <?= $_SESSION['success']; unset($_SESSION['success']); ?>
+        </div>
+    <?php endif; ?>
     <section class="form-section">
         <h2>Demande de covoiturage</h2>
         <form action="traitement_demande.php" method="POST">
@@ -92,5 +123,6 @@ $id_annonce = (int)$_GET['id'];
             <button type="submit">Soumettre la demande</button>
         </form>
     </section>
+<?php unset($_SESSION['form_data']); ?>
 </body>
 </html>

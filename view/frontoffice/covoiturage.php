@@ -369,7 +369,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 <?php endif; ?>
 
 <section class="hero">
-    <h1> Bienvenue sur Track My Bus</h1>
+    <h1> Bienvenue sur Share A Ride</h1>
     <p>Choisissez une option ci-dessous pour commencer</p>
     <div class="buttons">
         <a href="covoiturage.php?page=proposer" class="btn btn-primary">Proposer</a>
@@ -436,6 +436,12 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     <!-- AFFICHAGE DES ANNONCES -->
     <section id="annonces" class="annonces">
         <h2>📋 Annonces publiées</h2>
+        <div style="margin-bottom: 1rem;">
+            <label for="villeDepartSearch" style="font-weight: bold; margin-right: 0.5rem;">Ville de départ:</label>
+            <input type="text" id="villeDepartSearch" name="villeDepartSearch" placeholder="Rechercher ville de départ" style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid #ccc; font-size: 1rem; margin-right: 1rem;">
+            <label for="villeArriveeSearch" style="font-weight: bold; margin-right: 0.5rem;">Ville d'arrivée:</label>
+            <input type="text" id="villeArriveeSearch" name="villeArriveeSearch" placeholder="Rechercher ville d'arrivée" style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid #ccc; font-size: 1rem;">
+        </div>
         <div id="annoncesList">
             <?php
             try {
@@ -445,7 +451,20 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 die('Erreur : '.$e->getMessage());
             }
 
-$reponse = $bdd->query('SELECT * FROM `123` WHERE date >= CURDATE() ORDER BY date DESC');
+$annoncesPerPage = 4;
+$currentPage = isset($_GET['annonce_page']) && is_numeric($_GET['annonce_page']) ? (int)$_GET['annonce_page'] : 1;
+$offset = ($currentPage - 1) * $annoncesPerPage;
+
+// Get total count of annonces
+$totalAnnoncesStmt = $bdd->query('SELECT COUNT(*) FROM `123` WHERE date >= CURDATE()');
+$totalAnnonces = $totalAnnoncesStmt->fetchColumn();
+$totalPages = ceil($totalAnnonces / $annoncesPerPage);
+
+// Fetch annonces with limit and offset
+$reponse = $bdd->prepare('SELECT * FROM `123` WHERE date >= CURDATE() ORDER BY date DESC LIMIT :limit OFFSET :offset');
+$reponse->bindValue(':limit', $annoncesPerPage, PDO::PARAM_INT);
+$reponse->bindValue(':offset', $offset, PDO::PARAM_INT);
+$reponse->execute();
 
 if ($reponse->rowCount() == 0) {
     echo '<p class="text-gray-500 text-center">Aucune annonce publiée pour le moment</p>';
@@ -460,7 +479,7 @@ if ($reponse->rowCount() == 0) {
                 <div class="annonce-actions">
                     <button onclick="editAnnonce('.$annonce['id'].')" class="btn-action btn-edit">✏️ Modifier</button>
                     <button onclick="deleteAnnonce('.$annonce['id'].')" class="btn-action btn-delete">🗑️ Supprimer</button>
-                    <a href="demande_covoiturage.php?id=' . $annonce['id'] . '" class="btn-action btn-request">🚗 Demande de covoiturage</a>
+                    <a href="demande_covoiturage.php?id=' . $annonce['id'] . '" class="btn-action btn-request" style="text-decoration: none; cursor: pointer; background-color: #6b7280; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem;">🚗 Demande de covoiturage</a>
                 </div>
             </div>
             <div class="annonce-details">
@@ -479,20 +498,61 @@ if ($reponse->rowCount() == 0) {
 }
             ?>
         </div>
+        <div class="pagination" style="text-align:center; margin-top: 1rem;">
+            <?php if ($currentPage > 1): ?>
+                <a href="covoiturage.php?page=rechercher&annonce_page=<?= $currentPage - 1 ?>" class="btn btn-outline">Précédent</a>
+            <?php endif; ?>
+
+            <?php for ($pageNum = 1; $pageNum <= $totalPages; $pageNum++): ?>
+                <?php if ($pageNum == $currentPage): ?>
+                    <span class="btn btn-primary" style="pointer-events: none;"><?= $pageNum ?></span>
+                <?php else: ?>
+                    <a href="covoiturage.php?page=rechercher&annonce_page=<?= $pageNum ?>" class="btn btn-outline"><?= $pageNum ?></a>
+                <?php endif; ?>
+            <?php endfor; ?>
+
+            <?php if ($currentPage < $totalPages): ?>
+                <a href="covoiturage.php?page=rechercher&annonce_page=<?= $currentPage + 1 ?>" class="btn btn-outline">Suivant</a>
+            <?php endif; ?>
+        </div>
     </section>
 <?php endif; ?>
 <script>
-       
-        function editAnnonce(id) {
-            window.location.href = 'editer_covoiturage.php?id=' + id;
-        }
+    function editAnnonce(id) {
+        window.location.href = 'editer_covoiturage.php?id=' + id;
+    }
 
-      
-        function deleteAnnonce(id) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette annonce ?')) {
-                window.location.href = 'supprimer_covoiturage.php?id=' + id;
-            }
+    function deleteAnnonce(id) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette annonce ?')) {
+            window.location.href = 'supprimer_covoiturage.php?id=' + id;
         }
-    </script>
+    }
+
+    // Dynamic search functionality
+    const villeDepartInput = document.getElementById('villeDepartSearch');
+    const villeArriveeInput = document.getElementById('villeArriveeSearch');
+    const annoncesList = document.getElementById('annoncesList');
+
+    function fetchFilteredAnnonces() {
+        const villeDepart = villeDepartInput.value.trim();
+        const villeArrivee = villeArriveeInput.value.trim();
+
+        const params = new URLSearchParams();
+        if (villeDepart) params.append('villeDepart', villeDepart);
+        if (villeArrivee) params.append('villeArrivee', villeArrivee);
+
+        fetch('search_annonces.php?' + params.toString())
+            .then(response => response.text())
+            .then(html => {
+                annoncesList.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Erreur lors de la recherche dynamique:', error);
+            });
+    }
+
+    villeDepartInput.addEventListener('input', fetchFilteredAnnonces);
+    villeArriveeInput.addEventListener('input', fetchFilteredAnnonces);
+</script>
 </body>
 </html>
