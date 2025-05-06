@@ -25,36 +25,55 @@ if (isset($_GET['edit'])) {
 
 // Gestion de l'ajout ou modification
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get form data
     $nom = trim($_POST['nom']);
     $description = trim($_POST['description']);
     $lieu = trim($_POST['lieu']);
     $date = $_POST['date'];
     
-    // Gestion du fichier image
+    // Initialize variables
     $imagePath = null;
+    $isNewImage = false;
+    
+    // Handle image upload if provided
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $targetDir = "/../../image/";  // un dossier
-        $imagePath = "git_version/ProjetWeb2A41/image/" . $imageName;
-
+        $targetDir = "../../image/";
+        $baseUrlPath = "../../image/";
+        
+        // Create directory if needed
         if (!is_dir($targetDir)) {
             mkdir($targetDir, 0755, true);
         }
-
+        
+        // Generate unique filename
         $imageName = time() . "_" . basename($_FILES['image']['name']);
         $targetFile = $targetDir . $imageName;
-
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
-            $imagePath = "git_version/ProjetWeb2A41/image/" . $imageName;
-        } else {
-            echo "Erreur lors de l'upload de l'image.";
-            exit();
+        
+        // Validate file type
+        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+        $fileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
+        
+        if (in_array($fileType, $allowedTypes)) {
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
+                $imagePath = $baseUrlPath . $imageName;
+                $isNewImage = true;
+            }
         }
     }
 
-    if (!empty($nom) && !empty($description) && !empty($lieu) && !empty($date) && !empty($imagePath)) {
+    // Validate required fields
+    if (!empty($nom) && !empty($description) && !empty($lieu) && !empty($date)) {
         if (!empty($_POST['id_event'])) {
-            // Mise à jour
+            // UPDATE CASE
             $id_event = intval($_POST['id_event']);
+            
+            // If no new image, get existing image path
+            if (!$isNewImage) {
+                $existingEvent = $eventModel->getById($id_event);
+                $imagePath = $existingEvent['image'] ?? "";
+            }
+            
+            // Update event (image can be null to keep existing)
             $success = $eventModel->update($id_event, $nom, $description, $lieu, $date, $imagePath);
             
             if ($success) {
@@ -62,14 +81,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             }
         } else {
-            // Insertion
+            // INSERT CASE (image required)
+            if (!$isNewImage) {
+                die("Une image est obligatoire pour créer un nouvel événement");
+            }
+            
             $success = $eventModel->save($nom, $description, $lieu, $date, $imagePath);
             if ($success) {
                 header("Location: event.php");
                 exit();
-            } 
+            }
         }
-    } 
+    } else {
+        die("Tous les champs obligatoires doivent être remplis");
+    }
 }
 
 ?>
@@ -261,43 +286,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="card-body">
                         <form method="POST" id="event-form" enctype="multipart/form-data" novalidate>
                         <input type="hidden" name="id_event" value="<?= $eventToEdit['id_event'] ?? '' ?>">
-                                
-                                <input type="file" name="image">
-
-                                <div class="mb-3">
-                                    <label for="nom" class="form-label">Nom de l'Événement</label>
-                                    <input type="text" class="form-control" id="nom" name="nom" value="<?= $eventToEdit['nom'] ?? '' ?>" required>
-                                    <div class="text-danger error-message" id="nom-error"></div>
+                            <?php if (!empty($eventToEdit['image'])): ?>
+                                <div class="mb-3 text-center">
+                                    <label class="form-label fw-bold">Image actuelle :</label><br>
+                                    <img src="<?= htmlspecialchars($eventToEdit['image']) ?>" alt="Image actuelle" class="img-thumbnail" style="max-height: 200px;">
                                 </div>
+                            <?php endif; ?>
 
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control" id="description" name="description" rows="3" required><?= $eventToEdit['description'] ?? '' ?></textarea>
-                                    <div class="text-danger error-message" id="description-error"></div>
-                                </div>
+                            <div class="mb-3">
+                                <label for="image" class="form-label">Image de l'Événement</label>
+                                <input type="file" class="form-control" name="image" id="image">
+                            </div>
 
-                                <div class="mb-3">
-                                    <label for="lieu" class="form-label">Lieu</label>
-                                    <input type="text" class="form-control" id="lieu" name="lieu" value="<?= $eventToEdit['lieu'] ?? '' ?>" required>
-                                    <div class="text-danger error-message" id="lieu-error"></div>
-                                </div>
+                            <div class="mb-3">
+                                <label for="nom" class="form-label">Nom de l'Événement</label>
+                                <input type="text" class="form-control" id="nom" name="nom" value="<?= htmlspecialchars($eventToEdit['nom'] ?? '') ?>" required>
+                                <div class="text-danger error-message" id="nom-error"></div>
+                            </div>
 
-                                <div class="mb-3">
-                                    <label for="date" class="form-label">Date</label>
-                                    <input type="date" class="form-control" id="date" name="date" value="<?= $eventToEdit['date'] ?? '' ?>" required>
-                                    <div class="text-danger error-message" id="date-error"></div>
-                                </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3" required><?= htmlspecialchars($eventToEdit['description'] ?? '') ?></textarea>
+                                <div class="text-danger error-message" id="description-error"></div>
+                            </div>
 
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fas fa-save me-2"></i><?= isset($eventToEdit) ? 'Modifier' : 'Ajouter' ?>
-                                </button>
+                            <div class="mb-3">
+                                <label for="lieu" class="form-label">Lieu</label>
+                                <input type="text" class="form-control" id="lieu" name="lieu" value="<?= htmlspecialchars($eventToEdit['lieu'] ?? '') ?>" required>
+                                <div class="text-danger error-message" id="lieu-error"></div>
+                            </div>
 
-                                <?php if (isset($eventToEdit)): ?>
-                                    <a href="event.php" class="btn btn-outline-secondary w-100 mt-2">
-                                        <i class="fas fa-times me-2"></i>Annuler
-                                    </a>
-                                <?php endif; ?>
-                            </form>
+                            <div class="mb-3">
+                                <label for="date" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="date" name="date" value="<?= htmlspecialchars($eventToEdit['date'] ?? '') ?>" required>
+                                <div class="text-danger error-message" id="date-error"></div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-save me-2"></i><?= isset($eventToEdit) ? 'Modifier' : 'Ajouter' ?>
+                            </button>
+
+                            <?php if (isset($eventToEdit)): ?>
+                                <a href="event.php" class="btn btn-outline-secondary w-100 mt-2">
+                                    <i class="fas fa-times me-2"></i>Annuler
+                                </a>
+                            <?php endif; ?>   
+                        </form>
                         </div>
                     </div>
                 </div>
@@ -316,6 +350,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <tr>
                                             <th>Image</th>
                                             <th>Nom</th>
+                                            <th>Description</th>
                                             <th>Lieu</th>
                                             <th>Date</th>
                                             <th>Actions</th>
@@ -327,7 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <?php else: ?>
                                             <?php foreach ($events as $e): ?>
                                             <tr>
-                                                <td>
+                                                <td class="align-middle">
                                                     <?php if (!empty($e['image'])): ?>
                                                         <img src="<?= htmlspecialchars($e['image']) ?>" alt="image" width="80" height="60" style="object-fit: cover; border-radius: 5px;">
                                                     <?php else: ?>
@@ -335,10 +370,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                     <?php endif; ?>
                                                 </td>
 
-                                                    <td><?= htmlspecialchars($e['nom']) ?></td>
-                                                    <td><?= htmlspecialchars($e['lieu']) ?></td>
-                                                    <td><?= htmlspecialchars($e['date']) ?></td>
-                                                    <td class="action-btns">
+                                                    <td class="align-middle"><?= htmlspecialchars($e['nom']) ?></td>
+                                                    <td class="align-middle"><?= htmlspecialchars($e['description']) ?></td>
+                                                    <td class="align-middle"><?= htmlspecialchars($e['lieu']) ?></td>
+                                                    <td class="align-middle" style="min-width:100px;"><?= htmlspecialchars($e['date']) ?></td>
+                                                    <td class="action-btns d-flex align-items-center h-100" style="height:84px !important;">
                                                         <a href="?edit=<?= $e['id_event'] ?>" class="btn btn-sm btn-outline-primary me-1" title="Modifier">
                                                             <i class="fas fa-edit"></i>
                                                         </a>

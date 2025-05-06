@@ -49,12 +49,11 @@ $user = $_SESSION['user'];
                 <div class="col-md-4 mb-4">
                     <div class="card shadow">
                         <div class="card-body">
+                        <img  src="<?= !empty($event['image']) ? htmlspecialchars($event['image']) : 'https://citygem.app/wp-content/uploads/2024/08/placeholder-1-1.png' ?>"  alt="Image de l'événement" style="width:100%; height:160px; object-fit:cover;">
                             <h5 class="card-title"><?= htmlspecialchars($event['nom']) ?></h5>
                             <p class="card-text"><?= htmlspecialchars($event['description']) ?></p>
-                            
-                            <img src="<?= htmlspecialchars($event['image']) ?>" alt="Image de l'événement" style="width:100%; height:auto;">
-
-                            <p><strong>Date:</strong> <?= htmlspecialchars($event['date']) ?></p>
+                            <p><strong>Lieu :</strong> <?= htmlspecialchars($event['lieu']) ?></p>
+                            <p><strong>Date :</strong> <?= htmlspecialchars($event['date']) ?></p>
                             <button class="btn btn-primary" onclick="openConfirmModal(<?= (int)$event['id_event'] ?>)">
                                 Réserver
                             </button>

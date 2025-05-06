@@ -43,20 +43,16 @@ class EventController
     }
 
     // 🔹 Mettre à jour un événement
-    public function updateEvent($id_event, $nom, $description, $lieu, $date, $image)
-    {
-        $sql = "UPDATE event 
-                SET nom = :nom, description = :description, lieu = :lieu, date = :date, image = :image 
-                WHERE id_event = :id_event";
+    public function updateEvent($id, $nom, $description, $lieu, $date, $image = null) {
+        if ($image !== null) {
+            $sql = "UPDATE event SET nom=?, description=?, lieu=?, date=?, image=? WHERE id_event=?";
+            $params = [$nom, $description, $lieu, $date, $image, $id];
+        } else {
+            $sql = "UPDATE event SET nom=?, description=?, lieu=?, date=? WHERE id_event=?";
+            $params = [$nom, $description, $lieu, $date, $id];
+        }
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
-            ':nom' => $nom,
-            ':description' => $description,
-            ':lieu' => $lieu,
-            ':date' => $date,
-            ':id_event' => $id_event,
-            ':image' => $image
-        ]);
+        return $stmt->execute($params);
     }
 
     // 🔹 Supprimer un événement

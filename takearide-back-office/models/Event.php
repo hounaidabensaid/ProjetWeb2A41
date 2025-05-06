@@ -42,7 +42,7 @@ class Event
     }
 
     // Mettre à jour un événement
-    public function update($id, $nom, $description, $lieu, $date)
+    public function update($id, $nom, $description, $lieu, $date,$image)
     {
         $sql = "UPDATE event SET nom = :nom, description = :description, lieu = :lieu, date = :date, image = :image  WHERE id_event = :id";
         $stmt = $this->conn->prepare($sql);
