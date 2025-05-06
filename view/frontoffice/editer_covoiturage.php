@@ -22,7 +22,8 @@ try {
             matricule = ?,
             typeVehicule = ?,
             placesDisponibles = ?,
-            details = ?
+            details = ?,
+            telephone = ?
             WHERE id = ?');
         
         $req->execute([
@@ -36,6 +37,7 @@ try {
             $_POST['typeVehicule'],
             $_POST['placesDisponibles'],
             $_POST['details'],
+            $_POST['telephone'],
             $_POST['id']
         ]);
         
@@ -62,25 +64,27 @@ try {
             <form method="post">
                 <input type="hidden" name="id" value="<?= htmlspecialchars($annonce['id']) ?>">
 
-                <p><strong>Nom :</strong> <input type="text" name="nom" value="<?= htmlspecialchars($annonce['nom']) ?>" required></p>
+            <p><strong>Nom :</strong> <input type="text" name="nom" value="<?= htmlspecialchars($annonce['nom']) ?>" required></p>
 
-                <p><strong>Prénom :</strong> <input type="text" name="prenom" value="<?= htmlspecialchars($annonce['prenom']) ?>" required></p>
+            <p><strong>Prénom :</strong> <input type="text" name="prenom" value="<?= htmlspecialchars($annonce['prenom']) ?>" required></p>
 
-                <p><strong>Ville de départ :</strong> <input type="text" name="villeDepart" value="<?= htmlspecialchars($annonce['villeDepart']) ?>" required></p>
+            <p><strong>Ville de départ :</strong> <input type="text" name="villeDepart" value="<?= htmlspecialchars($annonce['villeDepart']) ?>" required></p>
 
-                <p><strong>Ville d'arrivée :</strong> <input type="text" name="villeArrivee" value="<?= htmlspecialchars($annonce['villeArrivee']) ?>" required></p>
+            <p><strong>Ville d'arrivée :</strong> <input type="text" name="villeArrivee" value="<?= htmlspecialchars($annonce['villeArrivee']) ?>" required></p>
 
-                <p><strong>Date :</strong> <input type="date" name="date" value="<?= htmlspecialchars($annonce['date']) ?>" required></p>
+            <p><strong>Date :</strong> <input type="date" name="date" value="<?= htmlspecialchars($annonce['date']) ?>" required></p>
 
-                <p><strong>Prix par personne :</strong> <input type="number" name="prix" value="<?= htmlspecialchars($annonce['prix']) ?>" required></p>
+            <p><strong>Prix par personne :</strong> <input type="number" name="prix" value="<?= htmlspecialchars($annonce['prix']) ?>" required></p>
 
-                <p><strong>Matricule du véhicule :</strong> <input type="text" name="matricule" value="<?= htmlspecialchars($annonce['matricule']) ?>" required></p>
+            <p><strong>Matricule du véhicule :</strong> <input type="text" name="matricule" value="<?= htmlspecialchars($annonce['matricule']) ?>" required></p>
 
-                <p><strong>Type de véhicule :</strong> <input type="text" name="typeVehicule" value="<?= htmlspecialchars($annonce['typeVehicule']) ?>" required></p>
+            <p><strong>Type de véhicule :</strong> <input type="text" name="typeVehicule" value="<?= htmlspecialchars($annonce['typeVehicule']) ?>" required></p>
 
-                <p><strong>Nombre de places disponibles :</strong> <input type="number" name="placesDisponibles" value="<?= htmlspecialchars($annonce['placesDisponibles']) ?>" required></p>
+            <p><strong>Nombre de places disponibles :</strong> <input type="number" name="placesDisponibles" value="<?= htmlspecialchars($annonce['placesDisponibles']) ?>" required></p>
 
-                <p><strong>Détails :</strong> <textarea name="details" ><?= htmlspecialchars($annonce['details']) ?></textarea></p>
+            <p><strong>Téléphone :</strong> <input type="tel" name="telephone" value="<?= htmlspecialchars($annonce['telephone']) ?>" required pattern="[0-9]{8}" title="Veuillez entrer un numéro de téléphone composé de 8 chiffres"></p>
+
+            <p><strong>Détails :</strong> <textarea name="details" ><?= htmlspecialchars($annonce['details']) ?></textarea></p>
 
                 <button type="submit">Mettre à jour</button>
             </form>

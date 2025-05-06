@@ -25,20 +25,20 @@ class CovoiturageModel
     }
 
     // Ajouter une annonce
-    public function addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details)
+    public function addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone)
     {
-        $sql = "INSERT INTO `123` (nom, prenom, villeDepart, villeArrivee, date, prix, matricule, typeVehicule, placesDisponibles, details) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO `123` (nom, prenom, villeDepart, villeArrivee, date, prix, matricule, typeVehicule, placesDisponibles, details, telephone) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute([$nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details]);
+        return $stmt->execute([$nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone]);
     }
 
     // Modifier une annonce
-    public function updateAnnonce($id, $nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details)
+    public function updateAnnonce($id, $nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone)
     {
-        $sql = "UPDATE `123` SET nom = ?, prenom = ?, villeDepart = ?, villeArrivee = ?, date = ?, prix = ?, matricule = ?, typeVehicule = ?, placesDisponibles = ?, details = ? WHERE id = ?";
+        $sql = "UPDATE `123` SET nom = ?, prenom = ?, villeDepart = ?, villeArrivee = ?, date = ?, prix = ?, matricule = ?, typeVehicule = ?, placesDisponibles = ?, details = ?, telephone = ? WHERE id = ?";
         $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute([$nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $id]);
+        return $stmt->execute([$nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone, $id]);
     }
 
     // Supprimer une annonce
@@ -55,7 +55,8 @@ class CovoiturageModel
         $sql = "SELECT * FROM `123` WHERE id = ?";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $annonce = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $annonce;
     }
     public function addDemande($id_annonce, $nom, $prenom, $telephone, $email, $places) {
         try {

@@ -1,13 +1,79 @@
 <?php
 require_once __DIR__ . '/../model/CovoiturageModel.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Twilio\Rest\Client;
 
 class CovoiturageController
 {
-    private $model; 
+    private $model;
+    private $twilioSid = 'US9b6fdc02f98985bef7fbb46aaf8a47a8';
+    private $twilioToken = 'f7b5f659dfbd60ea9998d4f15ae5655c';
+    private $twilioFromNumber = '+17073563756';
 
     public function __construct($pdo)
     {
         $this->model = new CovoiturageModel($pdo);
+    }
+
+    // Calculer la somme totale du prix pour une annonce donnée
+    public function calculateTotalPriceForAnnonce($id_annonce)
+    {
+        $annonce = $this->model->getAnnonceById($id_annonce);
+        if (!$annonce) {
+            throw new Exception("Annonce non trouvée");
+        }
+        $demandes = $this->model->getDemandesByAnnonceId($id_annonce);
+        $total = 0;
+        foreach ($demandes as $demande) {
+            $total += $demande['places'] * $annonce['prix'];
+        }
+        return ['total' => $total, 'telephone' => $annonce['telephone']];
+    }
+
+    // Send SMS using Twilio API
+    private function sendSms($phoneNumber, $message)
+    {
+        error_log("Attempting to send SMS to $phoneNumber with message: $message");
+        try {
+            $client = new Client($this->twilioSid, $this->twilioToken);
+            $messageInstance = $client->messages->create(
+                $phoneNumber,
+                [
+                    'from' => $this->twilioFromNumber,
+                    'body' => $message,
+                    'statusCallback' => 'https://yourdomain.com/twilio-status-callback.php'
+                ]
+            );
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['sms_message'] = "SMS envoyé à $phoneNumber : $message. Message SID: " . $messageInstance->sid;
+            error_log("SMS envoyé à $phoneNumber : $message. Message SID: " . $messageInstance->sid);
+            return true;
+        } catch (Exception $e) {
+            error_log("Erreur lors de l'envoi du SMS: " . $e->getMessage());
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['sms_error'] = "Erreur lors de l'envoi du SMS: " . $e->getMessage();
+            return false;
+        }
+    }
+
+    // Méthode pour calculer et envoyer le total par SMS
+    public function sendTotalPriceSms($id_annonce)
+    {
+        $result = $this->calculateTotalPriceForAnnonce($id_annonce);
+        $message = "Le total des prix pour votre annonce est: " . $result['total'] . " D";
+        $phoneNumber = $result['telephone'];
+        error_log("sendTotalPriceSms called with phone number: $phoneNumber and message: $message");
+        // Ensure phone number has country code +216 prefix
+        if (strpos($phoneNumber, '+216') !== 0) {
+            $phoneNumber = '+216' . ltrim($phoneNumber, '0');
+        }
+        error_log("Formatted phone number for SMS: $phoneNumber");
+        return $this->sendSms($phoneNumber, $message);
     }
 
     // Afficher toutes les annonces
@@ -23,7 +89,7 @@ class CovoiturageController
     }
 
     // Ajouter une annonce
-    public function addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details)
+    public function addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone)
     {
         $data = [
             'nom' => $nom,
@@ -35,16 +101,17 @@ class CovoiturageController
             'matricule' => $matricule,
             'typeVehicule' => $typeVehicule,
             'placesDisponibles' => $placesDisponibles,
-            'details' => $details
+            'details' => $details,
+            'telephone' => $telephone
         ];
         $this->validateAnnonceData($data);
-        return $this->model->addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details);
+        return $this->model->addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone);
     }
 
     // Modifier une annonce
-    public function updateAnnonce($id, $nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details)
+    public function updateAnnonce($id, $nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone)
     {
-        return $this->model->updateAnnonce($id, $nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details);
+        return $this->model->updateAnnonce($id, $nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone);
     }
 
     // Supprimer une annonce
@@ -54,6 +121,7 @@ class CovoiturageController
     }
 
     public function addDemande($id_annonce, $nom, $prenom, $telephone, $email, $places) {
+        error_log("addDemande called with id_annonce: $id_annonce");
         $data = [
             'id_annonce' => $id_annonce,
             'nom' => $nom,
@@ -83,6 +151,9 @@ class CovoiturageController
             error_log("Demande ajoutée avec succès, ID: $demande_id");
             $nouvelles_places = $annonce['placesDisponibles'] - $places;
             $this->model->updatePlacesDisponibles($id_annonce, $nouvelles_places);
+            // Trigger sending total price SMS
+            error_log("Calling sendTotalPriceSms for id_annonce: $id_annonce");
+            $this->sendTotalPriceSms($id_annonce);
         } else {
             error_log("Échec de l'ajout de la demande pour id_annonce: $id_annonce");
             throw new Exception("Erreur lors de l'ajout de la demande");
@@ -99,7 +170,7 @@ class CovoiturageController
     }
 
     private function validateAnnonceData($data) {
-        $required = ['nom', 'prenom', 'villeDepart', 'villeArrivee', 'date', 'prix', 'matricule', 'typeVehicule', 'placesDisponibles'];
+        $required = ['nom', 'prenom', 'villeDepart', 'villeArrivee', 'date', 'prix', 'matricule', 'typeVehicule', 'placesDisponibles', 'telephone'];
         
         foreach ($required as $field) {
             if (empty($data[$field])) {

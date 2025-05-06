@@ -100,29 +100,34 @@ session_start();
             <?= $_SESSION['success']; unset($_SESSION['success']); ?>
         </div>
     <?php endif; ?>
-    <section class="form-section">
-        <h2>Demande de covoiturage</h2>
-        <form action="traitement_demande.php" method="POST">
-            <input type="hidden" name="action" value="demande_covoiturage" />
-            <input type="hidden" name="id_annonce" value="<?= $id_annonce ?>" />
-            <div class="form-group">
-                <input type="text" name="nom" required placeholder="Nom" />
-            </div>
-            <div class="form-group">
-                <input type="text" name="prenom" required placeholder="Prénom" />
-            </div>
-            <div class="form-group">
-                <input type="tel" name="telephone" required placeholder="Téléphone" pattern="[0-9]{8}" title="Veuillez entrer un numéro de téléphone composé de 8 chiffres" />
-            </div>
-            <div class="form-group">
-                <input type="email" name="email" required placeholder="Email" />
-            </div>
-            <div class="form-group">
-                <input type="number" name="places" required placeholder="Nombre de places" />
-            </div>
-            <button type="submit">Soumettre la demande</button>
-        </form>
-    </section>
+        <section class="form-section">
+            <h2>Demande de covoiturage</h2>
+            <form action="traitement_demande.php" method="POST">
+                <input type="hidden" name="action" value="demande_covoiturage" />
+                <input type="hidden" name="id_annonce" value="<?= $id_annonce ?>" />
+                <div class="form-group">
+                    <input type="text" name="nom" required placeholder="Nom" />
+                </div>
+                <div class="form-group">
+                    <input type="text" name="prenom" required placeholder="Prénom" />
+                </div>
+                <div class="form-group">
+                    <input type="tel" name="telephone" required placeholder="Téléphone" pattern="[0-9]{8}" title="Veuillez entrer un numéro de téléphone composé de 8 chiffres" />
+                </div>
+                <div class="form-group">
+                    <input type="email" name="email" required placeholder="Email" />
+                </div>
+                <div class="form-group">
+                    <input type="number" name="places" required placeholder="Nombre de places" />
+                </div>
+                <?php if (isset($_SESSION['sms_message'])): ?>
+                    <div class="message success" style="background-color: #4CAF50; color: #fff; box-shadow: 0 0 10px #2e7d32; max-width: 600px; margin: 0 auto 1rem auto; padding: 1rem; border-radius: 0.5rem; font-weight: bold; text-align: center;">
+                        <?= $_SESSION['sms_message']; unset($_SESSION['sms_message']); ?>
+                    </div>
+                <?php endif; ?>
+                <button type="submit">Soumettre la demande</button>
+            </form>
+        </section>
 <?php unset($_SESSION['form_data']); ?>
 </body>
 </html>

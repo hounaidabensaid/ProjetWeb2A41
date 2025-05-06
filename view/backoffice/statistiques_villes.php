@@ -79,7 +79,7 @@ $totalArrivee = array_sum(array_column($stats['arrivee'], 'total'));
 
         const departCtx = document.getElementById('departChart').getContext('2d');
         const departChart = new Chart(departCtx, {
-            type: 'doughnut',
+            type: 'bar',
             data: {
                 labels: departLabels,
                 datasets: [{

@@ -18,6 +18,21 @@ if (!class_exists('Config')) {
 
 <?php
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
+
+// Load annonce data for editing if id is provided
+$editAnnonce = null;
+if (isset($_GET['edit_id'])) {
+    try {
+        $stmt = $bdd->prepare('SELECT * FROM `123` WHERE id = ?');
+        $stmt->execute([$_GET['edit_id']]);
+        $editAnnonce = $stmt->fetch();
+        if ($editAnnonce) {
+            $page = 'proposer'; // Show proposer form for editing
+        }
+    } catch (Exception $e) {
+        // Handle error or ignore
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -244,10 +259,27 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         .btn-delete {
             color: #ef4444;
             background-color: #fee2e2;
+            border: 1px solid black;
         }
-
+        
         .btn-delete:hover {
             background-color: #fecaca;
+            border: 1px solid black;
+        }
+        
+        .btn-delete:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.5);
+        }
+        
+        .btn-green {
+            color: white;
+            background-color:rgb(47, 67, 97);
+            border: 1px solid black;
+        }
+        
+        .btn-green:hover {
+            background-color:rgb(66, 108, 121);
         }
 
         .annonce-details {
@@ -384,32 +416,38 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 <!-- ✅ Sections dynamiques selon le bouton cliqué -->
 <?php if ($page === 'proposer'): ?>
     <!-- FORMULAIRE POUR PROPOSER UN COVOITURAGE -->
-    <section class="form-section">
-        <h2>📌 Proposer un covoiturage</h2>
-        <form method="POST" action="traitement_covoiturage.php">
-            <div class="form-group">
-                <input type="text" name="nom" placeholder="Nom" required>
-                <input type="text" name="prenom" placeholder="Prénom" required>
-            </div>
-            <div class="form-group">
-                <input type="text" name="villeDepart" placeholder="Ville de départ" required>
-                <input type="text" name="villeArrivee" placeholder="Ville d'arrivée" required>
-            </div>
-            <div class="form-group">
-                <input type="date" name="date" required>
-                <input type="number" name="prix" placeholder="Prix" required>
-            </div>
-            <div class="form-group">
-                <input type="text" name="matricule" placeholder="Matricule" required>
-                <input type="text" name="typeVehicule" placeholder="Type de véhicule" required>
-            </div>
-            <div class="form-group">
-                <input type="number" name="placesDisponibles" placeholder="Places disponibles" required>
-                <textarea name="details" placeholder="Détails supplémentaires"></textarea>
-            </div>
-            <button type="submit" name="action" value="ajouter_annonce" class="btn-submit">Publier</button>
-        </form>
-    </section>
+            <section class="form-section">
+                <h2>📌 <?php echo $editAnnonce ? 'Modifier un covoiturage' : 'Proposer un covoiturage'; ?></h2>
+                <form method="POST" action="traitement_covoiturage.php">
+                    <?php if ($editAnnonce): ?>
+                        <input type="hidden" name="id" value="<?= htmlspecialchars($editAnnonce['id']) ?>">
+                    <?php endif; ?>
+                    <div class="form-group">
+                        <input type="text" name="nom" placeholder="Nom" required value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['nom']) : '' ?>">
+                        <input type="text" name="prenom" placeholder="Prénom" required value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['prenom']) : '' ?>">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="villeDepart" placeholder="Ville de départ" required value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['villeDepart']) : '' ?>">
+                        <input type="text" name="villeArrivee" placeholder="Ville d'arrivée" required value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['villeArrivee']) : '' ?>">
+                    </div>
+                    <div class="form-group">
+                        <input type="date" name="date" required value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['date']) : '' ?>">
+                        <input type="number" name="prix" placeholder="Prix" required value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['prix']) : '' ?>">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="matricule" placeholder="Matricule" required value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['matricule']) : '' ?>">
+                        <input type="text" name="typeVehicule" placeholder="Type de véhicule" required value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['typeVehicule']) : '' ?>">
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" name="telephone" placeholder="Téléphone" required pattern="[0-9]{8}" title="Veuillez entrer un numéro de téléphone composé de 8 chiffres" value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['telephone']) : '' ?>">
+                        <input type="number" name="placesDisponibles" placeholder="Places disponibles" required value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['placesDisponibles']) : '' ?>">
+                    </div>
+                    <div class="form-group">
+                        <textarea name="details" placeholder="Détails supplémentaires"><?= $editAnnonce ? htmlspecialchars($editAnnonce['details']) : '' ?></textarea>
+                    </div>
+                    <button type="submit" name="action" value="<?= $editAnnonce ? 'modifier_annonce' : 'ajouter_annonce' ?>" class="btn-submit"><?= $editAnnonce ? 'Mettre à jour' : 'Publier' ?></button>
+                </form>
+            </section>
 
 <?php elseif ($page === 'demander'): ?>
     <!-- FORMULAIRE POUR DEMANDER UN COVOITURAGE -->
@@ -441,6 +479,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             <input type="text" id="villeDepartSearch" name="villeDepartSearch" placeholder="Rechercher ville de départ" style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid #ccc; font-size: 1rem; margin-right: 1rem;">
             <label for="villeArriveeSearch" style="font-weight: bold; margin-right: 0.5rem;">Ville d'arrivée:</label>
             <input type="text" id="villeArriveeSearch" name="villeArriveeSearch" placeholder="Rechercher ville d'arrivée" style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid #ccc; font-size: 1rem;">
+            <a href="total_prices.php" class="btn btn-primary" style="margin-left: 15rem;">Afficher prix total</a>
         </div>
         <div id="annoncesList">
             <?php
@@ -469,24 +508,25 @@ $reponse->execute();
 if ($reponse->rowCount() == 0) {
     echo '<p class="text-gray-500 text-center">Aucune annonce publiée pour le moment</p>';
 } else {
-    while ($annonce = $reponse->fetch()) {
+            while ($annonce = $reponse->fetch()) {
         echo '
         <div class="annonce">
             <div class="annonce-header">
                 <div class="annonce-title">
                     '.htmlspecialchars($annonce['villeDepart']).' → '.htmlspecialchars($annonce['villeArrivee']).'
                 </div>
-                <div class="annonce-actions">
-                    <button onclick="editAnnonce('.$annonce['id'].')" class="btn-action btn-edit">✏️ Modifier</button>
-                    <button onclick="deleteAnnonce('.$annonce['id'].')" class="btn-action btn-delete">🗑️ Supprimer</button>
-                    <a href="demande_covoiturage.php?id=' . $annonce['id'] . '" class="btn-action btn-request" style="text-decoration: none; cursor: pointer; background-color: #6b7280; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem;">🚗 Demande de covoiturage</a>
-                </div>
+    <div class="annonce-actions">
+    <a href="covoiturage.php?page=proposer&edit_id='.$annonce['id'].'" class="btn-action btn-green">✏️ Modifier</a>
+        <button onclick="deleteAnnonce('.$annonce['id'].')" class="btn-action btn-delete">🗑️ Supprimer</button>
+        <a href="demande_covoiturage.php?id=' . $annonce['id'] . '" class="btn-action btn-request" style="text-decoration: none; cursor: pointer; background-color: #6b7280; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem;">🚗 Demande de covoiturage</a>
+    </div>
             </div>
             <div class="annonce-details">
                 <div class="annonce-info"><strong>Date:</strong> '.htmlspecialchars($annonce['date']).'</div>
                 <div class="annonce-info"><strong>Prix:</strong> '.htmlspecialchars($annonce['prix']).' D</div>
                 <div class="annonce-info"><strong>Places:</strong> '.htmlspecialchars($annonce['placesDisponibles']).'</div>
                 <div class="annonce-info"><strong>Conducteur:</strong> '.htmlspecialchars($annonce['prenom']).' '.htmlspecialchars($annonce['nom']).'</div>
+                <div class="annonce-info"><strong>Téléphone:</strong> '.htmlspecialchars($annonce['telephone']).'</div>
             </div>
             <div class="annonce-info"><strong>Véhicule:</strong> '.htmlspecialchars($annonce['typeVehicule']).' ('.htmlspecialchars($annonce['matricule']).')</div>';
         
@@ -519,7 +559,7 @@ if ($reponse->rowCount() == 0) {
 <?php endif; ?>
 <script>
     function editAnnonce(id) {
-        window.location.href = 'editer_covoiturage.php?id=' + id;
+        window.location.href = 'covoiturage.php?page=proposer&edit_id=' + id;
     }
 
     function deleteAnnonce(id) {
@@ -532,6 +572,7 @@ if ($reponse->rowCount() == 0) {
     const villeDepartInput = document.getElementById('villeDepartSearch');
     const villeArriveeInput = document.getElementById('villeArriveeSearch');
     const annoncesList = document.getElementById('annoncesList');
+    const showTotalPriceBtn = document.getElementById('showTotalPriceBtn');
 
     function fetchFilteredAnnonces() {
         const villeDepart = villeDepartInput.value.trim();
@@ -551,8 +592,44 @@ if ($reponse->rowCount() == 0) {
             });
     }
 
+    function fetchTotalPrices() {
+        fetch('get_total_prices.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const pricesMap = new Map();
+                    data.data.forEach(item => {
+                        pricesMap.set(item.id, item.totalPrice);
+                    });
+
+                    // Update each annonce div with total price
+                    const annonceDivs = annoncesList.querySelectorAll('.annonce');
+                    annonceDivs.forEach(div => {
+                        const idMatch = div.querySelector('.btn-edit').getAttribute('onclick').match(/editAnnonce\((\d+)\)/);
+                        if (idMatch) {
+                            const annonceId = parseInt(idMatch[1]);
+                            const price = pricesMap.get(annonceId);
+                            let priceDiv = div.querySelector('.total-price');
+                            if (!priceDiv) {
+                                priceDiv = document.createElement('div');
+                                priceDiv.className = 'total-price annonce-info';
+                                div.appendChild(priceDiv);
+                            }
+                            priceDiv.textContent = 'Total prix: ' + (price !== undefined ? price + ' D' : 'N/A');
+                        }
+                    });
+                } else {
+                    console.error('Erreur lors de la récupération des totaux:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la récupération des totaux:', error);
+            });
+    }
+
     villeDepartInput.addEventListener('input', fetchFilteredAnnonces);
     villeArriveeInput.addEventListener('input', fetchFilteredAnnonces);
+    showTotalPriceBtn.addEventListener('click', fetchTotalPrices);
 </script>
 </body>
 </html>

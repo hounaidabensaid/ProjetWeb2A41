@@ -15,26 +15,46 @@ try {
         exit;
     }
 
-    // Use controller to add annonce with validation
-    $controller->addAnnonce(
-        $_POST['nom'],
-        $_POST['prenom'],
-        $_POST['villeDepart'],
-        $_POST['villeArrivee'],
-        $_POST['date'],
-        $_POST['prix'],
-        $_POST['matricule'],
-        $_POST['typeVehicule'],
-        $_POST['placesDisponibles'],
-        $_POST['details']
-    );
+    if (isset($_POST['id']) && !empty($_POST['id'])) {
+        // Update existing annonce
+        $controller->updateAnnonce(
+            $_POST['id'],
+            $_POST['nom'],
+            $_POST['prenom'],
+            $_POST['villeDepart'],
+            $_POST['villeArrivee'],
+            $_POST['date'],
+            $_POST['prix'],
+            $_POST['matricule'],
+            $_POST['typeVehicule'],
+            $_POST['placesDisponibles'],
+            $_POST['details'],
+            $_POST['telephone']
+        );
+        $_SESSION['success'] = "Annonce mise à jour avec succès.";
+    } else {
+        // Add new annonce
+        $controller->addAnnonce(
+            $_POST['nom'],
+            $_POST['prenom'],
+            $_POST['villeDepart'],
+            $_POST['villeArrivee'],
+            $_POST['date'],
+            $_POST['prix'],
+            $_POST['matricule'],
+            $_POST['typeVehicule'],
+            $_POST['placesDisponibles'],
+            $_POST['details'],
+            $_POST['telephone']
+        );
+        $_SESSION['success'] = "Annonce ajoutée avec succès.";
+    }
 
-    $_SESSION['success'] = "Annonce ajoutée avec succès.";
     header('Location: covoiturage.php');
     exit;
 
 } catch (Exception $e) {
-    $_SESSION['erreur'] = "Erreur lors de l'ajout de l'annonce : " . $e->getMessage();
+    $_SESSION['erreur'] = "Erreur lors de l'ajout ou mise à jour de l'annonce : " . $e->getMessage();
     $_SESSION['form_data'] = $_POST;
     header('Location: covoiturage.php');
     exit;

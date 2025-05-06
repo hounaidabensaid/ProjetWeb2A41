@@ -152,6 +152,7 @@ try {
                             <th>Matricule</th>
                             <th>Type de véhicule</th>
                             <th>Places</th>
+                            <th>Téléphone</th>
                             <th>Détails</th>
                             <th>Demandes</th>
                         </tr>
@@ -169,12 +170,13 @@ try {
                                     <td><?= htmlspecialchars($annonce['matricule']) ?></td>
                                     <td><?= htmlspecialchars($annonce['typeVehicule']) ?></td>
                                     <td><?= htmlspecialchars($annonce['placesDisponibles']) ?></td>
+                                    <td><?= htmlspecialchars($annonce['telephone']) ?></td>
                                     <td><?= htmlspecialchars($annonce['details']) ?></td>
                                     <td><a href="demandes_par_annonce.php?id=<?= htmlspecialchars($annonce['id']) ?>" class="btn btn-primary btn-sm">Voir demandes</a></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <tr><td colspan="11" class="text-center">Aucune annonce trouvée.</td></tr>
+                            <tr><td colspan="12" class="text-center">Aucune annonce trouvée.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
