@@ -42,7 +42,7 @@ class ReservationController {
 		    error_log("Tentative d'envoi SMS à $phoneNumber pour $userName");
 
         $sid = "AC72b8e4a7ab60857a56ad52d1555d848b";
-        $token = "8616e66e5a3576b99d35a12c3ba31480";
+        $token = "88c45ac488c79b1d9bf76a03fe290d8c";
         $twilioNumber = "+16628508706";
 
         $client = new Client($sid, $token);

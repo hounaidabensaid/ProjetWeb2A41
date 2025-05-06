@@ -14,20 +14,42 @@ $id_user = 1;
 
 // Récupérer toutes les voitures
 $reservation = $controller->getAllReservations();
-
-// Si une soumission a été faite
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id_voiture_post = $_POST['id_voiture'];
+    $id_user_post = $_POST['id_user'];
+    $date_debut_post = $_POST['date_debut'];
+    $date_fin_post = $_POST['date_fin'];
+
+    // Vérifier s'il existe une réservation confirmée pour la même voiture avec chevauchement
+    $existingConflict = array_filter($reservation, function ($r) use ($id_voiture_post, $date_debut_post, $date_fin_post) {
+        if ($r['id_voiture'] != $id_voiture_post || $r['statut'] !== 'confirmée') {
+            return false;
+        }
+
+        // Vérifie si les plages de dates se chevauchent
+        return !(
+            $date_fin_post < $r['date_début'] || $date_debut_post > $r['date_fin']
+        );
+    });
+
+    if (!empty($existingConflict)) {
+        echo "<script>alert('Impossible : une réservation confirmée chevauche déjà ces dates pour cette voiture.'); window.history.back();</script>";
+        exit;
+    }
+
+    // Ajouter la nouvelle réservation
     $reservation = new Reservation();
-    $reservation->setIdVoiture($_POST['id_voiture']);
-    $reservation->setIdUser($_POST['id_user']);
-    $reservation->setDateDébut($_POST['date_debut']);
-    $reservation->setDateFin($_POST['date_fin']);
+    $reservation->setIdVoiture($id_voiture_post);
+    $reservation->setIdUser($id_user_post);
+    $reservation->setDateDébut($date_debut_post);
+    $reservation->setDateFin($date_fin_post);
     $reservation->setStatut("en attente");
 
     $controller->addReservation($reservation);
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $_POST['id_voiture'] . '&success=1');
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id_voiture_post . '&success=1');
     exit;
 }
+
 
 if (isset($_GET['delete'])) {
     $controller->deleteReservation($_GET['delete']);
