@@ -11,16 +11,17 @@ class EventController
     }
 
     // 🔹 Ajouter un événement
-    public function addEvent($nom, $description, $lieu, $date, $image)
+    public function addEvent($nom, $description, $lieu, $date, $nbplace, $image)
     {
-        $sql = "INSERT INTO event (nom, description, lieu, date, image) 
-                VALUES (:nom, :description, :lieu, :date, :image)";
+        $sql = "INSERT INTO event (nom, description, lieu, date, nbplace, image) 
+                VALUES (:nom, :description, :lieu, :date, :nbplace, :image)";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             ':nom' => $nom,
             ':description' => $description,
             ':lieu' => $lieu,
             ':date' => $date,
+            ':nbplace' => (int)$nbplace,
             ':image' => $image
         ]);
     }
@@ -30,7 +31,7 @@ class EventController
     {
         $sql = "SELECT * FROM event";
         $stmt = $this->pdo->query($sql);
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // 🔹 Récupérer un événement par ID
@@ -39,17 +40,17 @@ class EventController
         $sql = "SELECT * FROM event WHERE id_event = :id_event";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id_event' => $id_event]);
-        return $stmt->fetch();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     // 🔹 Mettre à jour un événement
-    public function updateEvent($id, $nom, $description, $lieu, $date, $image = null) {
+    public function updateEvent($id, $nom, $description, $lieu, $date, $nbplace, $image = null) {
         if ($image !== null) {
-            $sql = "UPDATE event SET nom=?, description=?, lieu=?, date=?, image=? WHERE id_event=?";
-            $params = [$nom, $description, $lieu, $date, $image, $id];
+            $sql = "UPDATE event SET nom=?, description=?, lieu=?, date=?, nbplace = ?, image=? WHERE id_event=?";
+            $params = [$nom, $description, $lieu, $date, (int)$nbplace, $image, $id];
         } else {
-            $sql = "UPDATE event SET nom=?, description=?, lieu=?, date=? WHERE id_event=?";
-            $params = [$nom, $description, $lieu, $date, $id];
+            $sql = "UPDATE event SET nom=?, description=?, lieu=?, date=?, nbplace = ? WHERE id_event=?";
+            $params = [$nom, $description, $lieu, $date, (int)$nbplace, $id];
         }
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute($params);
@@ -62,5 +63,15 @@ class EventController
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id_event' => $id_event]);
     }
+     // 🔹 Mettre à jour nbplace (pour les réservations)
+     public function updateNbPlace($id_event, $increment)
+     {
+         $sql = "UPDATE event SET nbplace = nbplace + :increment WHERE id_event = :id";
+         $stmt = $this->pdo->prepare($sql);
+         return $stmt->execute([
+             ':increment' => $increment, // +1 ou -1
+             ':id' => $id_event
+         ]);
+     }
 }
 ?>

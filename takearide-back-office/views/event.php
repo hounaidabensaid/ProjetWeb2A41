@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($_POST['description']);
     $lieu = trim($_POST['lieu']);
     $date = $_POST['date'];
+    $nbplace = (int)$_POST['nbplace'];
     
     // Initialize variables
     $imagePath = null;
@@ -62,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Validate required fields
-    if (!empty($nom) && !empty($description) && !empty($lieu) && !empty($date)) {
+    if (!empty($nom) && !empty($description) && !empty($lieu) && !empty($date) && !empty($nbplace)) {
         if (!empty($_POST['id_event'])) {
             // UPDATE CASE
             $id_event = intval($_POST['id_event']);
@@ -74,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             // Update event (image can be null to keep existing)
-            $success = $eventModel->update($id_event, $nom, $description, $lieu, $date, $imagePath);
+            $success = $eventModel->update($id_event, $nom, $description, $lieu, $date, $nbplace, $imagePath);
             
             if ($success) {
                 header("Location: event.php");
@@ -86,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 die("Une image est obligatoire pour créer un nouvel événement");
             }
             
-            $success = $eventModel->save($nom, $description, $lieu, $date, $imagePath);
+            $success = $eventModel->save($nom, $description, $lieu, $date,$nbplace, $imagePath);
             if ($success) {
                 header("Location: event.php");
                 exit();
@@ -310,6 +311,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="text-danger error-message" id="description-error"></div>
                             </div>
 
+                           
+                            <!-- Nouveau champ pour nbplace -->
+                            <div class="mb-3">
+                                <label for="nbplace" class="form-label">Nombre de places</label>
+                                <input type="number" class="form-control" id="nbplace" name="nbplace" value="<?= htmlspecialchars($eventToEdit['nbplace'] ?? '') ?>" min="1" required>
+                                <div class="text-danger error-message" id="nbplace-error"></div>
+                            </div>
+                            
                             <div class="mb-3">
                                 <label for="lieu" class="form-label">Lieu</label>
                                 <input type="text" class="form-control" id="lieu" name="lieu" value="<?= htmlspecialchars($eventToEdit['lieu'] ?? '') ?>" required>
@@ -321,6 +330,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <input type="date" class="form-control" id="date" name="date" value="<?= htmlspecialchars($eventToEdit['date'] ?? '') ?>" required>
                                 <div class="text-danger error-message" id="date-error"></div>
                             </div>
+
 
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="fas fa-save me-2"></i><?= isset($eventToEdit) ? 'Modifier' : 'Ajouter' ?>
@@ -351,6 +361,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <th>Image</th>
                                             <th>Nom</th>
                                             <th>Description</th>
+                                            <th>Nbplace</th>
                                             <th>Lieu</th>
                                             <th>Date</th>
                                             <th>Actions</th>
@@ -372,6 +383,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                                                     <td class="align-middle"><?= htmlspecialchars($e['nom']) ?></td>
                                                     <td class="align-middle"><?= htmlspecialchars($e['description']) ?></td>
+                                                    <td class="align-middle"><?= htmlspecialchars($e['nbplace']) ?></td>
                                                     <td class="align-middle"><?= htmlspecialchars($e['lieu']) ?></td>
                                                     <td class="align-middle" style="min-width:100px;"><?= htmlspecialchars($e['date']) ?></td>
                                                     <td class="action-btns d-flex align-items-center h-100" style="height:84px !important;">
@@ -408,7 +420,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const description = document.getElementById('description').value.trim();
         const lieu = document.getElementById('lieu').value.trim();
         const date = document.getElementById('date').value;
-
+        const nbplace = document.getElementById('nbplace').value;
         // Reset des messages d'erreur
         document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
 
@@ -437,6 +449,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error = true;
         } else if (date < today) {
             document.getElementById('date-error').textContent = "La date ne peut pas être dans le passé.";
+            error = true;
+        }
+        
+        // Validation du Nombre de places
+        if (!nbplace || nbplace < 1) {
+            document.getElementById('nbplace-error').textContent = "Le nombre de places doit être supérieur à 0.";
             error = true;
         }
 

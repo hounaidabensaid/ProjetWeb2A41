@@ -19,15 +19,16 @@ class Event
     }
 
     // Ajouter un événement
-    public function save($nom, $description, $lieu, $date, $image)
+    public function save($nom, $description, $lieu, $date, $nbplace, $image)
     {
-        $sql = "INSERT INTO event (nom, description, lieu, date, image) VALUES (:nom, :description, :lieu, :date, :image)";
+        $sql = "INSERT INTO event (nom, description, lieu, date, nbplace, image) VALUES (:nom, :description, :lieu, :date, :nbplace, :image)";
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([
             ':nom' => $nom,
             ':description' => $description,
             ':lieu' => $lieu,
             ':date' => $date,
+            ':nbplace' => (int)$nbplace,
             ':image' => $image
         ]);
     }
@@ -42,15 +43,16 @@ class Event
     }
 
     // Mettre à jour un événement
-    public function update($id, $nom, $description, $lieu, $date,$image)
+    public function update($id, $nom, $description, $lieu, $date, $nbplace, $image)
     {
-        $sql = "UPDATE event SET nom = :nom, description = :description, lieu = :lieu, date = :date, image = :image  WHERE id_event = :id";
+        $sql = "UPDATE event SET nom = :nom, description = :description, lieu = :lieu, date = :date, nbplace = :nbplace, image = :image  WHERE id_event = :id";
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([
             ':nom' => $nom,
             ':description' => $description,
             ':lieu' => $lieu,
             ':date' => $date,
+            ':nbplace' => (int)$nbplace,
             ':image' => $image,
             ':id' => $id
         ]);
@@ -62,6 +64,17 @@ class Event
         $sql = "DELETE FROM event WHERE id_event = :id";
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([':id' => $id]);
+    }
+
+    // Mettre à jour nbplace (pour les réservations)
+    public function updateNbPlace($id_event, $increment)
+    {
+        $sql = "UPDATE event SET nbplace = nbplace + :increment WHERE id_event = :id";
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute([
+            ':increment' => $increment, // Peut être +1 ou -1
+            ':id' => $id_event
+        ]);
     }
 }
 ?>

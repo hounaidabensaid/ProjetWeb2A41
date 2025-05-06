@@ -1,23 +1,9 @@
-<?php
-if (!isset($_SESSION['user'])) {
-    $_SESSION['user'] = [
-        'id' => 3,
-        'nom' => 'Mejri',
-        'prenom' => 'Lina',
-        'email' => 'lina@example.com',
-        'role' => 'client'
-    ];
-}
-
-// Récupérer l'utilisateur
-$user = $_SESSION['user'];
-?>
-<form method="GET" class="mb-4">
+<form method="GET" class="mb-4" id="searchForm">
     <div class="row">
         <div class="col-md-3">
             <label for="search" class="form-label">🔍 Rechercher :</label>
             <input type="text" name="search" id="search" class="form-control" placeholder="Nom ou description"
-                value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                   value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
         </div>
         <div class="col-md-3">
             <label for="sort" class="form-label">Trier par :</label>
@@ -40,8 +26,6 @@ $user = $_SESSION['user'];
     </div>
 </form>
 
-
-
 <div class="container mt-4">
     <div class="row">
         <?php if (isset($events) && !empty($events)): ?>
@@ -49,19 +33,29 @@ $user = $_SESSION['user'];
                 <div class="col-md-4 mb-4">
                     <div class="card shadow">
                         <div class="card-body">
-                        <img  src="<?= !empty($event['image']) ? htmlspecialchars($event['image']) : 'https://citygem.app/wp-content/uploads/2024/08/placeholder-1-1.png' ?>"  alt="Image de l'événement" style="width:100%; height:160px; object-fit:cover;">
+                            <img src="<?= !empty($event['image']) ? htmlspecialchars($event['image']) : 'https://citygem.app/wp-content/uploads/2024/08/placeholder-1-1.png' ?>"
+                                 alt="Image de l'événement"
+                                 style="width:100%; height:160px; object-fit:cover;">
                             <h5 class="card-title"><?= htmlspecialchars($event['nom']) ?></h5>
                             <p class="card-text"><?= htmlspecialchars($event['description']) ?></p>
                             <p><strong>Lieu :</strong> <?= htmlspecialchars($event['lieu']) ?></p>
                             <p><strong>Date :</strong> <?= htmlspecialchars($event['date']) ?></p>
-                            <button class="btn btn-primary" onclick="openConfirmModal(<?= (int)$event['id_event'] ?>)">
-                                Réserver
-                            </button>
+                            <p><strong>Nombre de place :</strong> <?= htmlspecialchars($event['nbplace']) ?></p>
+
+                            <?php if ((int)$event['nbplace'] > 0): ?>
+                                <button class="btn btn-primary" onclick="openConfirmModal(<?= (int)$event['id_event'] ?>)">
+                                    Réserver
+                                </button>
+                            <?php else: ?>
+                                <button class="btn btn-secondary" disabled>
+                                    Complet
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
 
-                <!-- Modal Confirmation DIRECTE -->
+                <!-- Modal de confirmation -->
                 <div class="modal fade" id="confirmModal<?= (int)$event['id_event'] ?>" tabindex="-1">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -82,7 +76,6 @@ $user = $_SESSION['user'];
                         </div>
                     </div>
                 </div>
-
             <?php endforeach; ?>
         <?php else: ?>
             <p>Aucun événement disponible pour le moment.</p>
@@ -90,33 +83,12 @@ $user = $_SESSION['user'];
     </div>
 </div>
 
-<!-- JS -->
 <script>
-function openConfirmModal(eventId) {
-    const confirmModal = new bootstrap.Modal(document.getElementById("confirmModal" + eventId));
-    confirmModal.show();
-}
-
-function submitReservation(eventId) {
-    const formData = new FormData();
-    formData.append("id_event", eventId);
-
-    fetch("http://localhost/yassvf/takearideyas/takearide-front-office/frontoffice/booking.php?action=storeReservation", {
-        method: "POST",
-        body: formData
-    })
-    .then(res => res.json())
-    .then(result => {
-        if (result.success) {
-            alert("✅ Réservation confirmée !");
-            bootstrap.Modal.getInstance(document.getElementById("confirmModal" + eventId)).hide();
-        } else {
-            alert("❌ Erreur : " + result.error);
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("⚠️ Erreur serveur !");
-    });
-}
+let searchTimeout;
+document.getElementById("search").addEventListener("input", function () {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function () {
+        document.getElementById("searchForm").submit();
+    }, 500);
+});
 </script>

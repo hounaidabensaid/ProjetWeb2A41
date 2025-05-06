@@ -6,32 +6,34 @@ require_once 'models/ReservationEvent.php';
 class EventController {
     public function showCards() {
         $events = Event::getAll();
-
+    
         // Tri
         $validSortKeys = ['nom', 'date'];
         $validOrders = ['asc', 'desc'];
         $sortKey = isset($_GET['sort']) && in_array($_GET['sort'], $validSortKeys) ? $_GET['sort'] : null;
         $sortOrder = isset($_GET['order']) && in_array($_GET['order'], $validOrders) ? $_GET['order'] : 'asc';
     
-        // Recherche
+        // Recherche (keystop déclenche juste un GET classique)
         if (!empty($_GET['search'])) {
-            $search = strtolower($_GET['search']);
+            $search = strtolower(trim($_GET['search']));
             $events = array_filter($events, function ($event) use ($search) {
                 return strpos(strtolower($event['nom']), $search) !== false ||
                        strpos(strtolower($event['description']), $search) !== false;
             });
         }
     
-        // Tri final si demandé
+        // Tri
         if ($sortKey) {
             usort($events, function ($a, $b) use ($sortKey, $sortOrder) {
-                $comparison = strcmp($a[$sortKey], $b[$sortKey]);
-                return $sortOrder === 'asc' ? $comparison : -$comparison;
+                return $sortOrder === 'asc'
+                    ? strcmp($a[$sortKey], $b[$sortKey])
+                    : strcmp($b[$sortKey], $a[$sortKey]);
             });
         }
     
         require 'views/events/cards.php';
     }
+    
 
     public function storeReservation() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
