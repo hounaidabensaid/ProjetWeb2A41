@@ -59,6 +59,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = "Niveau de gravité invalide.";
         }
 
+        // Validate email
+        $email = trim($_POST['email'] ?? '');
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "L'email est invalide.";
+        }
+
         // Handle file upload
         $piece_jointe = null;
         if (!empty($_FILES['fichier']['name'])) {
@@ -103,7 +109,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sujet,
             $description,
             $gravite,
-            $piece_jointe
+            $piece_jointe,
+            $email // Ajout de l'email
         );
 
         // Add to database

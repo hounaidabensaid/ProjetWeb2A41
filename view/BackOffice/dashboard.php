@@ -6,13 +6,13 @@ $reclamations = $controller->getReclamations();
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - ShareRide BackOffice</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="dashboard.css">
     <style>
         .search {
             position: relative;
@@ -31,7 +31,7 @@ $reclamations = $controller->getReclamations();
         }
 
         .sort-btn:hover {
-            color:rgb(170, 8, 8);
+            color: rgb(170, 8, 8);
         }
         
         .reset-sort-btn {
@@ -45,7 +45,7 @@ $reclamations = $controller->getReclamations();
         }
 
         .reset-sort-btn:hover {
-            color:rgb(170, 8, 8);
+            color: rgb(170, 8, 8);
         }
         .sort-menu {
             position: absolute;
@@ -74,30 +74,31 @@ $reclamations = $controller->getReclamations();
         }
 
         .sort-menu button {
-            background:rgb(170, 8, 8);
+            background: rgb(170, 8, 8);
             color: #fff;
             border: none;
             cursor: pointer;
         }
 
         .sort-menu button:hover {
-            background:rgb(170, 8, 8);
+            background: rgb(170, 8, 8);
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
+    <!-- Barre latérale -->
     <div class="sidebar">
         <h1>Share a ride</h1>
         <div class="menu-item active"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
         <div class="menu-item"><i class="fas fa-file-alt"></i> Réclamations</div>
         <div class="menu-item"><i class="fas fa-users"></i> Utilisateurs</div>
+        <div class="menu-item"><i class="fas fa-chart-pie"></i> <a href="statistics.php" style="color: white; text-decoration: none;">Statistiques</a></div>
         <div class="menu-item"><i class="fas fa-cog"></i> Paramètres</div>
     </div>
 
     <!-- Dashboard -->
     <div class="dashboard">
-        <!-- Overlay for dimming the background -->
+        <!-- Overlay pour assombrir l'arrière-plan -->
         <div class="overlay" id="overlay" onclick="closeResponsePanel()"></div>
 
         <div class="header">
@@ -120,6 +121,7 @@ $reclamations = $controller->getReclamations();
                         <option value="4" data-type="string">Sujet</option>
                         <option value="5" data-type="string">Gravité</option>
                         <option value="6" data-type="string">Statut</option>
+                        <option value="7" data-type="string">Email</option> <!-- Nouvelle option pour email -->
                     </select>
                     <label for="sortOrder">Ordre :</label>
                     <select id="sortOrder">
@@ -131,13 +133,12 @@ $reclamations = $controller->getReclamations();
             </div>
         </div>
 
-        
-        <!-- Table Controls -->
+        <!-- Contrôles du tableau -->
         <button class="toggle-table-btn" onclick="toggleTable()">
             <i class="fas fa-chevron-up"></i> Réduire/Agrandir le tableau
         </button>
         <button class="toggle-table-btn">
-           <a href="view_reponse.php"><i class="fas fa-info-circle"></i> liste reponses</a> 
+           <a href="view_reponse.php"><i class="fas fa-info-circle"></i> Liste réponses</a> 
         </button>
         <a href="generate_reclamations_pdf.php" target="_blank">
             <button class="toggle-table-btn">
@@ -145,7 +146,7 @@ $reclamations = $controller->getReclamations();
             </button>
         </a>
 
-        <!-- Reclamations Table -->
+        <!-- Tableau des réclamations -->
         <div class="collapsible-table" id="reclamationTable">
             <table>
                 <thead>
@@ -157,6 +158,7 @@ $reclamations = $controller->getReclamations();
                         <th onclick="sortTable(4, 'string')">Sujet <i class="fas fa-sort"></i></th>
                         <th onclick="sortTable(5, 'string')">Gravité <i class="fas fa-sort"></i></th>
                         <th onclick="sortTable(6, 'string')">Statut <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(7, 'string')">Email <i class="fas fa-sort"></i></th> <!-- Nouvelle colonne email -->
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -170,6 +172,7 @@ $reclamations = $controller->getReclamations();
                             <td><?php echo htmlspecialchars($reclamation['sujet']); ?></td>
                             <td><?php echo htmlspecialchars($reclamation['gravite']); ?></td>
                             <td><?php echo htmlspecialchars($reclamation['statut']); ?></td>
+                            <td><?php echo htmlspecialchars($reclamation['email']); ?></td> <!-- Affichage de l'email -->
                             <td>
                                 <div class="action-buttons">
                                     <button class="btn btn-primary" onclick="window.location.href='add_reponse.php?reclamation_id=<?php echo $reclamation['id']; ?>'">
@@ -190,7 +193,7 @@ $reclamations = $controller->getReclamations();
         </div>
     </div>
 
-    <!-- Details Modal -->
+    <!-- Modal des détails -->
     <div class="details-modal" id="detailsModal">
         <div class="details-modal-content">
             <button class="close-modal" onclick="closeDetailsModal()">×</button>
@@ -208,7 +211,7 @@ $reclamations = $controller->getReclamations();
 
     <!-- JavaScript -->
     <script>
-        // Toggle Table Collapse
+        // Basculer l'état du tableau
         function toggleTable() {
             const table = document.getElementById('reclamationTable');
             const toggleBtn = document.querySelector('.toggle-table-btn i');
@@ -217,7 +220,7 @@ $reclamations = $controller->getReclamations();
             toggleBtn.classList.toggle('fa-chevron-down');
         }
 
-        // Open Response Panel (passing the reclamation id)
+        // Ouvre le panneau de réponse (en passant l'ID de la réclamation)
         function openResponsePanel2(id) {
             const responsePanel = document.getElementById('responsePanel');
             const overlay = document.getElementById('overlay');
@@ -227,7 +230,7 @@ $reclamations = $controller->getReclamations();
             document.getElementById('responseForm').reset();
         }
 
-        // Close Response Panel
+        // Ferme le panneau de réponse
         function closeResponsePanel2() {
             const responsePanel = document.getElementById('responsePanel');
             const overlay = document.getElementById('overlay');
@@ -235,7 +238,7 @@ $reclamations = $controller->getReclamations();
             overlay.style.display = 'none';
         }
 
-        // Open Response Panel
+        // Ouvre le panneau de réponse
         function openResponsePanel(id) {
             fetch(`get_reclamation.php?id=${id}`)
                 .then(response => response.json())
@@ -254,26 +257,26 @@ $reclamations = $controller->getReclamations();
                 });
         }
 
-        // Close Response Panel
+        // Ferme le panneau de réponse
         function closeResponsePanel() {
             document.getElementById('responsePanel').classList.remove('active');
             document.getElementById('overlay').classList.remove('active');
         }
 
-        // Open Details Modal
+        // Ouvre le modal des détails
         function openDetailsModal(id, description) {
             document.getElementById('detailsDescription').textContent = description;
             document.getElementById('detailsModal').classList.add('active');
             document.getElementById('modalOverlay').classList.add('active');
         }
 
-        // Close Details Modal
+        // Ferme le modal des détails
         function closeDetailsModal() {
             document.getElementById('detailsModal').classList.remove('active');
             document.getElementById('modalOverlay').classList.remove('active');
         }
 
-        // Generate PDF
+        // Génère le PDF
         function generatePDF() {
             const originalText = event.target.innerHTML;
             event.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération PDF...';
@@ -286,7 +289,7 @@ $reclamations = $controller->getReclamations();
             }, 3000);
         }
 
-        // Delete Reclamation
+        // Supprime une réclamation
         function deleteReclamation(id) {
             if (confirm('Êtes-vous sûr de vouloir supprimer cette réclamation ?')) {
                 fetch('delete_reclamation.php', {
@@ -299,13 +302,13 @@ $reclamations = $controller->getReclamations();
                     if (data.success) {
                         location.reload();
                     } else {
-                        alert('Erreur: ' + data.message);
+                        alert('Erreur : ' + data.message);
                     }
                 });
             }
         }
 
-        // Search Functionality
+        // Fonctionnalité de recherche
         document.getElementById('searchInput').addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
             const rows = document.querySelectorAll('#reclamationTableBody tr');
@@ -315,35 +318,35 @@ $reclamations = $controller->getReclamations();
             });
         });
 
-        // Sorting Functionality
+        // Fonctionnalité de tri
         let sortDirection = {};
         
         function sortTable(columnIndex, dataType) {
             const table = document.getElementById('reclamationTableBody');
             const rows = Array.from(table.querySelectorAll('tr'));
             
-            // Toggle sort direction
+            // Basculer la direction du tri
             sortDirection[columnIndex] = !sortDirection[columnIndex];
             const direction = sortDirection[columnIndex] ? 1 : -1;
             
-            // Update sort icons
+            // Mettre à jour les icônes de tri
             document.querySelectorAll('th i').forEach(icon => icon.className = 'fas fa-sort');
             const currentTh = document.querySelector(`th:nth-child(${columnIndex + 1}) i`);
             currentTh.className = `fas ${sortDirection[columnIndex] ? 'fa-sort-up' : 'fa-sort-down'}`;
             
-            // Sort rows
+            // Trier les lignes
             rows.sort((rowA, rowB) => {
                 let valueA = rowA.cells[columnIndex].textContent.trim();
                 let valueB = rowB.cells[columnIndex].textContent.trim();
                 
-                // Handle different data types
+                // Gérer différents types de données
                 if (dataType === 'number') {
                     valueA = parseFloat(valueA) || 0;
                     valueB = parseFloat(valueB) || 0;
                 } else if (dataType === 'date') {
                     valueA = new Date(valueA);
                     valueB = new Date(valueB);
-                    // Handle invalid dates
+                    // Gérer les dates invalides
                     if (isNaN(valueA)) valueA = new Date(0);
                     if (isNaN(valueB)) valueB = new Date(0);
                 } else {
@@ -356,40 +359,40 @@ $reclamations = $controller->getReclamations();
                 return 0;
             });
             
-            // Clear and re-append rows
+            // Effacer et ré-ajouter les lignes
             table.innerHTML = '';
             rows.forEach(row => table.appendChild(row));
         }
 
-        // Toggle Sort Menu
+        // Basculer le menu de tri
         function toggleSortMenu() {
             const sortMenu = document.getElementById('sortMenu');
             sortMenu.style.display = sortMenu.style.display === 'none' ? 'block' : 'none';
         }
 
-        // Apply Sort
+        // Appliquer le tri
         function applySort() {
             const sortColumn = document.getElementById('sortColumn');
             const columnIndex = sortColumn.value;
             const dataType = sortColumn.options[sortColumn.selectedIndex].getAttribute('data-type');
             const sortOrder = document.getElementById('sortOrder').value;
             
-            // Set sort direction based on selected order
+            // Définir la direction du tri en fonction de l'ordre sélectionné
             sortDirection[columnIndex] = sortOrder === 'asc';
             
-            // Call existing sortTable function
+            // Appeler la fonction de tri existante
             sortTable(columnIndex, dataType);
             
-            // Update sort icon in table header
+            // Mettre à jour l'icône de tri dans l'en-tête du tableau
             document.querySelectorAll('th i').forEach(icon => icon.className = 'fas fa-sort');
             const currentTh = document.querySelector(`th:nth-child(${parseInt(columnIndex) + 1}) i`);
             currentTh.className = `fas ${sortOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down'}`;
             
-            // Close sort menu
+            // Fermer le menu de tri
             toggleSortMenu();
         }
 
-        // Close sort menu when clicking outside
+        // Fermer le menu de tri en cliquant à l'extérieur
         document.addEventListener('click', function(event) {
             const sortMenu = document.getElementById('sortMenu');
             const sortBtn = document.querySelector('.sort-btn');
@@ -398,18 +401,18 @@ $reclamations = $controller->getReclamations();
             }
         });
         
-        // Reset Sort
+        // Réinitialiser le tri
         function resetSort() {
             const table = document.getElementById('reclamationTableBody');
             const rows = Array.from(table.querySelectorAll('tr'));
             
-            // Reset sort direction
+            // Réinitialiser la direction du tri
             sortDirection = {};
             
-            // Reset sort icons
+            // Réinitialiser les icônes de tri
             document.querySelectorAll('th i').forEach(icon => icon.className = 'fas fa-sort');
             
-            // Restore original order (based on ID ascending)
+            // Restaurer l'ordre original (basé sur l'ID croissant)
             table.innerHTML = '';
             rows.sort((a, b) => {
                 const idA = parseFloat(a.cells[0].textContent) || 0;

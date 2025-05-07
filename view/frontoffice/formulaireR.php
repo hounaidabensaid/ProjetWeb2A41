@@ -209,6 +209,14 @@
                                 </div>
                             </div>
                             <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="Votre email" required>
+                                    <label for="email">Votre email *</label>
+                                    <span id="emailError" class="error-message"></span>
+                                    <span id="emailValid" class="valid-message"></span>
+                                </div>
+                            </div>
+                            <div class="col-12">
                                 <div class="form-group">
                                     <label for="fichier">Pièce jointe (max 2MB, facultatif)</label>
                                     <input type="file" class="form-control" id="fichier" name="fichier" accept="image/*,.pdf">
@@ -299,6 +307,7 @@
         document.getElementById("description").addEventListener("input", validateDescription);
         document.getElementById("gravite").addEventListener("change", validateGravite);
         document.getElementById("fichier").addEventListener("change", validateFileUpload);
+        document.getElementById("email").addEventListener("input", validateEmail);
 
         function validateType() {
             const type = document.getElementById("type").value;
@@ -505,6 +514,28 @@
             }
         }
 
+        function validateEmail() {
+            const email = document.getElementById("email").value.trim();
+            const errorElement = document.getElementById("emailError");
+            const validElement = document.getElementById("emailValid");
+
+            if (!email || !/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+                errorElement.textContent = "Veuillez entrer un email valide.";
+                errorElement.classList.add("show");
+                validElement.classList.remove("show");
+                document.getElementById("email").classList.add("is-invalid");
+                document.getElementById("email").classList.remove("is-valid");
+                return false;
+            } else {
+                errorElement.classList.remove("show");
+                validElement.textContent = "✔ Email valide";
+                validElement.classList.add("show");
+                document.getElementById("email").classList.remove("is-invalid");
+                document.getElementById("email").classList.add("is-valid");
+                return true;
+            }
+        }
+
         // Soumission du formulaire via AJAX
         document.getElementById("reclamationForm").addEventListener("submit", function(e) {
             e.preventDefault(); // Empêche la soumission par défaut
@@ -518,6 +549,7 @@
             if (!validateSujet()) isValid = false;
             if (!validateDescription()) isValid = false;
             if (!validateGravite()) isValid = false;
+            if (!validateEmail()) isValid = false; // Nouvelle validation
             if (!validateFileUpload()) isValid = false;
 
             if (isValid) {

@@ -7,42 +7,33 @@ error_reporting(E_ALL);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Handle file or image upload
+    $piece_jointe = null;
+    $uploadDir = 'C:/xampp/htdocs/ShareRide/uploads/';
+    
     if (isset($_FILES['piece_jointe']) && $_FILES['piece_jointe']['error'] == UPLOAD_ERR_OK) {
-        // Handle file upload
         $fileTmpPath = $_FILES['piece_jointe']['tmp_name'];
         $fileName = $_FILES['piece_jointe']['name'];
-        $fileType = $_FILES['piece_jointe']['type'];
-        $fileSize = $_FILES['piece_jointe']['size'];
-
-        // Specify the directory where the file will be saved
-        $uploadDir = 'C:/xampp/htdocs/ShareRide/uploads/';  // Absolute path
         $uploadFilePath = $uploadDir . basename($fileName);
 
-        // Check if the directory is writable
         if (!is_writable($uploadDir)) {
             die('The upload directory is not writable. Please check permissions.');
         }
 
-        // Check if the file is successfully uploaded
         if (move_uploaded_file($fileTmpPath, $uploadFilePath)) {
-            // File uploaded successfully
-            $piece_jointe = 'uploads/' . basename($fileName);  // Store relative path in DB
+            $piece_jointe = 'Uploads/' . basename($fileName);
         } else {
             die('File upload failed. PHP error: ' . $_FILES['piece_jointe']['error']);
         }
     } elseif (isset($_POST['captured_image']) && !empty($_POST['captured_image'])) {
-        // Handle the base64-encoded image data (camera image)
         $imageData = $_POST['captured_image'];
         $imageData = str_replace('data:image/png;base64,', '', $imageData);
         $imageData = base64_decode($imageData);
 
-        // Create a unique filename for the image
         $fileName = uniqid('camera_') . '.png';
         $uploadFilePath = $uploadDir . $fileName;
 
-        // Save the image to the server
         if (file_put_contents($uploadFilePath, $imageData)) {
-            $piece_jointe = 'uploads/' . $fileName;  // Store relative path in DB
+            $piece_jointe = 'Uploads/' . $fileName;
         } else {
             die('Failed to save the image.');
         }
@@ -50,31 +41,75 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         die('No file or image provided.');
     }
 
-    // Ensure date_creation is set (use current date if not provided)
-    $date_creation = $_POST['date_creation'] ?? date('Y-m-d H:i:s');  // Default to current date and time if not provided
+    // Ensure date_creation is set
+    $date_creation = $_POST['date_creation'] ?? date('Y-m-d H:i:s');
 
     // Get database connection
     $db = config::getConnexion();
 
     // Always set admin_id to 1
-    $admin_id = 1;  // Automatically set admin_id to 1 (since Sara is the only admin)
+    $admin_id = 1;
 
     try {
+        // Insert the response
         $sql = "INSERT INTO reponse (reclamation_id, admin_id, contenu, date_creation, piece_jointe) 
                 VALUES (:reclamation_id, :admin_id, :contenu, :date_creation, :piece_jointe)";
         $stmt = $db->prepare($sql);
         $stmt->bindParam(':reclamation_id', $_POST['reclamation_id']);
-        $stmt->bindParam(':admin_id', $admin_id);  // Always set to 1
+        $stmt->bindParam(':admin_id', $admin_id);
         $stmt->bindParam(':contenu', $_POST['contenu']);
-        $stmt->bindParam(':date_creation', $date_creation);  // Bind the date_creation
+        $stmt->bindParam(':date_creation', $date_creation);
         $stmt->bindParam(':piece_jointe', $piece_jointe);
         $stmt->execute();
+
+        // Ajout du code d'envoi d'email
+        require_once __DIR__ . '/../../vendor/autoload.php';
+        use PHPMailer\PHPMailer\PHPMailer;
+        use PHPMailer\PHPMailer\Exception;
+
+        $reclamation_id = $_POST['reclamation_id'];
+        $sql = "SELECT email FROM reclamation WHERE id = :reclamation_id";
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':reclamation_id', $reclamation_id);
+        $stmt->execute();
+        $reclamation = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($reclamation && !empty($reclamation['email'])) {
+            $mail = new PHPMailer(true);
+            try {
+                $mail->isSMTP();
+                $mail->Host = 'smtp.gmail.com';
+                $mail->SMTPAuth = true;
+                $mail->Username = 'sarrabennejma09@gmail.com'; // Remplacez par votre email
+                $mail->Password = 'qjglkbeudvwiuewu'; // Remplacez par votre mot de passe d'application
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port = 587;
+
+                $mail->setFrom('sarrabennejma09@gmail.com', 'Support ShareRide'); // Remplacez par votre email
+                $mail->addAddress($reclamation['email']);
+
+                $mail->isHTML(true);
+                $mail->Subject = 'Réponse à votre réclamation - ShareRide';
+                $mail->Body = '
+                    <h2>Bonjour,</h2>
+                    <p>Nous avons répondu à votre réclamation (ID : ' . htmlspecialchars($reclamation_id) . ').</p>
+                    <p><strong>Réponse :</strong> ' . htmlspecialchars($_POST['contenu']) . '</p>
+                    <p>Veuillez consulter votre espace utilisateur pour plus de détails.</p>
+                    <p>Cordialement,<br>L\'équipe ShareRide</p>
+                ';
+                $mail->AltBody = 'Bonjour, nous avons répondu à votre réclamation (ID : ' . $reclamation_id . '). Réponse : ' . $_POST['contenu'] . '. Consultez votre espace utilisateur pour plus de détails. Cordialement, L\'équipe ShareRide';
+
+                $mail->send();
+            } catch (Exception $e) {
+                error_log("Échec de l'envoi de l'email : {$mail->ErrorInfo}");
+            }
+        }
+
+        // Redirect after processing
+        header("Location: view_reponse.php");
+        exit();
     } catch (Exception $e) {
         die('Erreur: ' . $e->getMessage());
     }
-
-    // Redirect or respond after processing
-    header("Location: view_reponse.php");
-    exit();
 }
 ?>

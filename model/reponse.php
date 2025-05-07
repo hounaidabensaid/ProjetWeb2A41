@@ -15,12 +15,9 @@ class Reponse {
         $this->date_creation = $date_creation;
     }
 
+    // Getters
     public function getId() {
         return $this->id;
-    }
-    public function setId($id) {
-        $this->id = $id;
-        return $this; // Optional: allows method chaining
     }
 
     public function getReclamationId() {
@@ -43,8 +40,33 @@ class Reponse {
         return $this->date_creation;
     }
 
-    // Setters for updating data
+    // Setters
+    public function setId($id) {
+        if (!is_numeric($id) || $id <= 0) {
+            throw new InvalidArgumentException("L'ID doit être un entier positif.");
+        }
+        $this->id = $id;
+        return $this;
+    }
+
+    public function setReclamationId($reclamation_id) {
+        if (!is_numeric($reclamation_id) || $reclamation_id <= 0) {
+            throw new InvalidArgumentException("L'ID de la réclamation doit être un entier positif.");
+        }
+        $this->reclamation_id = $reclamation_id;
+    }
+
+    public function setAdminId($admin_id) {
+        if (!is_numeric($admin_id) || $admin_id <= 0) {
+            throw new InvalidArgumentException("L'ID de l'admin doit être un entier positif.");
+        }
+        $this->admin_id = $admin_id;
+    }
+
     public function setContenu($contenu) {
+        if (empty($contenu)) {
+            throw new InvalidArgumentException("Le contenu ne peut pas être vide.");
+        }
         $this->contenu = $contenu;
     }
 
@@ -53,6 +75,10 @@ class Reponse {
     }
 
     public function setDateCreation($date_creation) {
+        if (!empty($date_creation) && !strtotime($date_creation)) {
+            throw new InvalidArgumentException("La date de création doit être une date valide.");
+        }
         $this->date_creation = $date_creation;
     }
 }
+?>
