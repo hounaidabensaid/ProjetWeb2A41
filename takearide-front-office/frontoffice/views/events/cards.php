@@ -1,3 +1,17 @@
+<?php
+if (!isset($_SESSION['user'])) {
+    $_SESSION['user'] = [
+        'id' => 3,
+        'nom' => 'Mejri',
+        'prenom' => 'Lina',
+        'email' => 'lina@example.com',
+        'role' => 'client'
+    ];
+}
+
+// Récupérer l'utilisateur
+$user = $_SESSION['user'];
+?>
 <form method="GET" class="mb-4" id="searchForm">
     <div class="row">
         <div class="col-md-3">
@@ -84,6 +98,39 @@
 </div>
 
 <script>
+
+
+function openConfirmModal(eventId) {
+     const confirmModal = new bootstrap.Modal(document.getElementById("confirmModal" + eventId));
+     confirmModal.show();
+ }
+ 
+ function submitReservation(eventId) {
+     const formData = new FormData();
+     formData.append("id_event", eventId);
+ 
+     fetch("http://localhost/yassvf/takearideyas/takearide-front-office/frontoffice/booking.php?action=storeReservation", {
+         method: "POST",
+         body: formData
+     })
+     .then(res => res.json())
+     .then(result => {
+         if (result.success) {
+             bootstrap.Modal.getInstance(document.getElementById("confirmModal" + eventId)).hide();
+             setTimeout(() => {
+                alert("✅ Réservation confirmée !");
+             }, 1000);
+         } else {
+             alert("❌ Erreur : " + result.error);
+         }
+     })
+     .catch(err => {
+         console.error(err);
+         alert("⚠️ Erreur serveur !");
+     });
+ }
+
+
 let searchTimeout;
 document.getElementById("search").addEventListener("input", function () {
     clearTimeout(searchTimeout);
