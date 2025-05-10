@@ -1,25 +1,34 @@
 <?php
+$page = isset($_GET['page']) ? $_GET['page'] : 'voiture';
+
 try {
-    // Connexion à la base de données
-    $bdd = new PDO('mysql:host=localhost;dbname=123;charset=utf8', 'root', '');
-    $bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    if ($page === 'voiture') {
+        // Connexion à la base de données
+        $bdd = new PDO('mysql:host=localhost;dbname=123;charset=utf8', 'root', '');
+        $bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Requête de recherche
-    $searchQuery = "";
-    if (isset($_POST['search']) && $_POST['search'] != "") {
-        $searchQuery = '%' . $_POST['search'] . '%';
-    }
-    
-    // Récupérer toutes les annonces, ou selon la recherche
-    if ($searchQuery) {
-        $stmt = $bdd->prepare('SELECT * FROM `123` WHERE nom LIKE ? OR prenom LIKE ? OR villeDepart LIKE ? OR villeArrivee LIKE ?');
-        $stmt->execute([$searchQuery, $searchQuery, $searchQuery, $searchQuery]);
-    } else {
-        $stmt = $bdd->prepare('SELECT * FROM `123`');
-        $stmt->execute();
-    }
+        // Requête de recherche
+        $searchQuery = "";
+        if (isset($_POST['search']) && $_POST['search'] != "") {
+            $searchQuery = '%' . $_POST['search'] . '%';
+        }
+        
+        // Récupérer toutes les annonces, ou selon la recherche
+        if ($searchQuery) {
+            $stmt = $bdd->prepare('SELECT * FROM `123` WHERE nom LIKE ? OR prenom LIKE ? OR villeDepart LIKE ? OR villeArrivee LIKE ?');
+            $stmt->execute([$searchQuery, $searchQuery, $searchQuery, $searchQuery]);
+        } else {
+            $stmt = $bdd->prepare('SELECT * FROM `123`');
+            $stmt->execute();
+        }
 
-    $annonces = $stmt->fetchAll();
+        $annonces = $stmt->fetchAll();
+
+        // Debug output removed to clean affichage
+        // echo '<pre>';
+        // print_r($annonces);
+        // echo '</pre>';
+    }
 } catch (Exception $e) {
     die('Erreur : ' . $e->getMessage());
 }
@@ -110,81 +119,87 @@ try {
             <h3 class="text-center">Admin Panel</h3>
         </div>
         <ul class="sidebar-menu">
-            <li><a href="#"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-            <li><a href="#"><i class="fas fa-users"></i> Utilisateurs</a></li>
-            <li><a href="index_voiture.php" class="active"><i class="fas fa-car"></i> Gestion covoiturage</a></li>
-            <li><a href="statistiques_villes_controller.php"><i class="fas fa-chart-bar"></i> Statistiques villes</a></li>
-            <li><a href="#"><i class="fas fa-calendar-check"></i> Réservations</a></li>
-            <li><a href="#"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            <li><a href="#" class="<?= $page === 'dashboard' ? 'active' : '' ?>"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+            <li><a href="?page=users" class="<?= $page === 'users' ? 'active' : '' ?>"><i class="fas fa-users"></i> Utilisateurs</a></li>
+            <li><a href="?page=voiture" class="<?= $page === 'voiture' ? 'active' : '' ?>"><i class="fas fa-car"></i> Gestion covoiturage</a></li>
+            <li><a href="statistiques_villes_controller.php" class="<?= $page === 'statistiques' ? 'active' : '' ?>"><i class="fas fa-chart-bar"></i> Statistiques villes</a></li>
+            <li><a href="#" class="<?= $page === 'reservations' ? 'active' : '' ?>"><i class="fas fa-calendar-check"></i> Réservations</a></li>
+            <li><a href="#" class="<?= $page === 'logout' ? 'active' : '' ?>"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
         </ul>
     </div>
 
     <div class="main-content">
         <div class="container-fluid">
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h2 class="mb-0">Gestion covoiturage</h2>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Listes des annonces</li>
-                        </ol>
-                    </nav>
+            <?php if ($page === 'voiture'): ?>
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="mb-0">Gestion covoiturage</h2>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Listes des annonces</li>
+                            </ol>
+                        </nav>
+                    </div>
                 </div>
-            </div>
 
-            <div class="search-bar mb-3">
-                <form method="post" class="d-flex">
-                    <input type="text" id="searchInput" name="search" value="<?= isset($_POST['search']) ? htmlspecialchars($_POST['search']) : '' ?>" placeholder="Rechercher..." class="form-control" />
-                    <button type="submit" class="ms-2 btn btn-primary">Rechercher</button>
-                </form>
-            </div>
-            <div id="annoncesTableWrapper">
-                <table class="table table-bordered table-hover">
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Prénom</th>
-                            <th>Ville de départ</th>
-                            <th>Ville d'arrivée</th>
-                            <th>Date</th>
-                            <th>Prix</th>
-                            <th>Matricule</th>
-                            <th>Type de véhicule</th>
-                            <th>Places</th>
-                            <th>Téléphone</th>
-                            <th>Détails</th>
-                            <th>Demandes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="annoncesTableBody">
-                        <?php if (count($annonces) > 0): ?>
-                            <?php foreach ($annonces as $annonce): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($annonce['nom']) ?></td>
-                                    <td><?= htmlspecialchars($annonce['prenom']) ?></td>
-                                    <td><?= htmlspecialchars($annonce['villeDepart']) ?></td>
-                                    <td><?= htmlspecialchars($annonce['villeArrivee']) ?></td>
-                                    <td><?= htmlspecialchars($annonce['date']) ?></td>
-                                    <td><?= htmlspecialchars($annonce['prix']) ?> D</td>
-                                    <td><?= htmlspecialchars($annonce['matricule']) ?></td>
-                                    <td><?= htmlspecialchars($annonce['typeVehicule']) ?></td>
-                                    <td><?= htmlspecialchars($annonce['placesDisponibles']) ?></td>
-                                    <td><?= htmlspecialchars($annonce['telephone']) ?></td>
-                                    <td><?= htmlspecialchars($annonce['details']) ?></td>
-                                    <td><a href="demandes_par_annonce.php?id=<?= htmlspecialchars($annonce['id']) ?>" class="btn btn-primary btn-sm">Voir demandes</a></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr><td colspan="12" class="text-center">Aucune annonce trouvée.</td></tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+                <div class="search-bar mb-3">
+                    <form method="post" class="d-flex">
+                        <input type="text" id="searchInput" name="search" value="<?= isset($_POST['search']) ? htmlspecialchars($_POST['search']) : '' ?>" placeholder="Rechercher..." class="form-control" />
+                        <button type="submit" class="ms-2 btn btn-primary">Rechercher</button>
+                    </form>
+                </div>
+                <div id="annoncesTableWrapper">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Ville de départ</th>
+                                <th>Ville d'arrivée</th>
+                                <th>Date</th>
+                                <th>Prix</th>
+                                <th>Matricule</th>
+                                <th>Type de véhicule</th>
+                                <th>Places</th>
+                                <th>Téléphone</th>
+                                <th>Détails</th>
+                                <th>Demandes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="annoncesTableBody">
+                            <?php if (count($annonces) > 0): ?>
+                                <?php foreach ($annonces as $annonce): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($annonce['nom']) ?></td>
+                                        <td><?= htmlspecialchars($annonce['prenom']) ?></td>
+                                        <td><?= htmlspecialchars($annonce['villeDepart']) ?></td>
+                                        <td><?= htmlspecialchars($annonce['villeArrivee']) ?></td>
+                                        <td><?= htmlspecialchars($annonce['date']) ?></td>
+                                        <td><?= htmlspecialchars($annonce['prix']) ?> D</td>
+                                        <td><?= htmlspecialchars($annonce['matricule']) ?></td>
+                                        <td><?= htmlspecialchars($annonce['typeVehicule']) ?></td>
+                                        <td><?= htmlspecialchars($annonce['placesDisponibles']) ?></td>
+                                        <td><?= htmlspecialchars($annonce['telephone']) ?></td>
+                                        <td><?= htmlspecialchars($annonce['details']) ?></td>
+<td><a href="/web/view/backoffice/demandes_par_annonce.php?id=<?= htmlspecialchars($annonce['id']) ?>" class="btn btn-primary btn-sm">Voir demandes</a></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr><td colspan="12" class="text-center">Aucune annonce trouvée.</td></tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
 
-            <div class="table-responsive">
-                <!-- Removed duplicate table display -->
-            </div>
+                <div class="table-responsive">
+                    <!-- Removed duplicate table display -->
+                </div>
+            <?php elseif ($page === 'users'): ?>
+                <?php include 'index_user_content.php'; ?>
+            <?php else: ?>
+                <h2>Page non trouvée</h2>
+            <?php endif; ?>
         </div>
     </div>
 </body>

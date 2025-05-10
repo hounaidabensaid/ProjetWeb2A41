@@ -49,13 +49,15 @@ try {
     // 8. Traitement des données
     try {
         error_log("Tentative d'ajout de demande pour annonce ID: " . $_POST['id_annonce']);
+        $user_id = $_SESSION['user_id'] ?? null;
         $demandeId = $controller->addDemande(
             (int)$_POST['id_annonce'],
             htmlspecialchars($_POST['nom']),
             htmlspecialchars($_POST['prenom']),
             preg_replace('/[^0-9+]/', '', $_POST['telephone']),
             filter_var($_POST['email'], FILTER_SANITIZE_EMAIL),
-            (int)$_POST['places']
+            (int)$_POST['places'],
+            $user_id
         );
         error_log("Demande ajoutée avec succès, ID: " . $demandeId);
     } catch (Exception $ex) {

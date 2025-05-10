@@ -25,12 +25,12 @@ class CovoiturageModel
     }
 
     // Ajouter une annonce
-    public function addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone)
+    public function addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone, $user_id)
     {
-        $sql = "INSERT INTO `123` (nom, prenom, villeDepart, villeArrivee, date, prix, matricule, typeVehicule, placesDisponibles, details, telephone) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO `123` (nom, prenom, villeDepart, villeArrivee, date, prix, matricule, typeVehicule, placesDisponibles, details, telephone, user_id) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute([$nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone]);
+        return $stmt->execute([$nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone, $user_id]);
     }
 
     // Modifier une annonce
@@ -58,13 +58,13 @@ class CovoiturageModel
         $annonce = $stmt->fetch(PDO::FETCH_ASSOC);
         return $annonce;
     }
-    public function addDemande($id_annonce, $nom, $prenom, $telephone, $email, $places) {
+    public function addDemande($id_annonce, $nom, $prenom, $telephone, $email, $places, $user_id) {
         try {
             $this->pdo->beginTransaction();
-            $sql = "INSERT INTO demande (id_annonce, nom, prenom, telephone, email, places) 
-                    VALUES (?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO demande (id_annonce, nom, prenom, telephone, email, places, user_id) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([$id_annonce, $nom, $prenom, $telephone, $email, $places]);
+            $stmt->execute([$id_annonce, $nom, $prenom, $telephone, $email, $places, $user_id]);
             $lastId = $this->pdo->lastInsertId();
             $this->pdo->commit();
             return $lastId;

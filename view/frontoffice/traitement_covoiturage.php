@@ -34,6 +34,7 @@ try {
         $_SESSION['success'] = "Annonce mise à jour avec succès.";
     } else {
         // Add new annonce
+        $user_id = $_SESSION['user_id'] ?? null;
         $controller->addAnnonce(
             $_POST['nom'],
             $_POST['prenom'],
@@ -45,7 +46,8 @@ try {
             $_POST['typeVehicule'],
             $_POST['placesDisponibles'],
             $_POST['details'],
-            $_POST['telephone']
+            $_POST['telephone'],
+            $user_id
         );
         $_SESSION['success'] = "Annonce ajoutée avec succès.";
     }

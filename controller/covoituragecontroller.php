@@ -89,7 +89,7 @@ class CovoiturageController
     }
 
     // Ajouter une annonce
-    public function addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone)
+    public function addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone, $user_id)
     {
         $data = [
             'nom' => $nom,
@@ -102,10 +102,11 @@ class CovoiturageController
             'typeVehicule' => $typeVehicule,
             'placesDisponibles' => $placesDisponibles,
             'details' => $details,
-            'telephone' => $telephone
+            'telephone' => $telephone,
+            'user_id' => $user_id
         ];
         $this->validateAnnonceData($data);
-        return $this->model->addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone);
+        return $this->model->addAnnonce($nom, $prenom, $villeDepart, $villeArrivee, $date, $prix, $matricule, $typeVehicule, $placesDisponibles, $details, $telephone, $user_id);
     }
 
     // Modifier une annonce
@@ -120,7 +121,7 @@ class CovoiturageController
         return $this->model->deleteAnnonce($id);
     }
 
-    public function addDemande($id_annonce, $nom, $prenom, $telephone, $email, $places) {
+    public function addDemande($id_annonce, $nom, $prenom, $telephone, $email, $places, $user_id) {
         error_log("addDemande called with id_annonce: $id_annonce");
         $data = [
             'id_annonce' => $id_annonce,
@@ -128,7 +129,8 @@ class CovoiturageController
             'prenom' => $prenom,
             'telephone' => $telephone,
             'email' => $email,
-            'places' => $places
+            'places' => $places,
+            'user_id' => $user_id
         ];
         
         $this->validateDemandeData($data);
@@ -146,7 +148,7 @@ class CovoiturageController
         }
         
         // Ajouter la demande et mettre à jour les places disponibles
-        $demande_id = $this->model->addDemande($id_annonce, $nom, $prenom, $telephone, $email, $places);
+        $demande_id = $this->model->addDemande($id_annonce, $nom, $prenom, $telephone, $email, $places, $user_id);
         if ($demande_id) {
             error_log("Demande ajoutée avec succès, ID: $demande_id");
             $nouvelles_places = $annonce['placesDisponibles'] - $places;

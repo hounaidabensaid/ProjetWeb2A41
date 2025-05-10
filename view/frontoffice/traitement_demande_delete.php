@@ -29,7 +29,11 @@ try {
         $_SESSION['erreur'] = "Erreur lors de la suppression de la demande.";
     }
 
-    header("Location: /web/view/frontoffice/voir_demandes.php?annonce_id=" . ($_POST['id_annonce'] ?? ''));
+    $annonce_id = $_POST['id_annonce'] ?? null;
+    if (empty($annonce_id)) {
+        $annonce_id = ''; // or set a default valid id if possible
+    }
+    header("Location: /web/view/frontoffice/voir_demandes.php?annonce_id=" . $annonce_id);
     exit;
 
 } catch (Exception $e) {

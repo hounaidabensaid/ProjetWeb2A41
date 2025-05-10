@@ -120,6 +120,7 @@ try {
     <header style="opacity: 0; transition: opacity 1s ease;">
         <img src="images/car_trip.gif" alt="Car Trip" />
         <h1>Total Prix des Annonces</h1>
+        <input type="text" id="searchConducteur" placeholder="Rechercher par nom du conducteur" style="margin-top: 1rem; padding: 0.5rem; font-size: 1rem; border-radius: 0.5rem; border: 1px solid #c20303; width: 100%; max-width: 400px; box-sizing: border-box;" />
     </header>
     <main style="opacity: 0; transition: opacity 1s ease;">
         <table>
@@ -172,6 +173,27 @@ try {
                 header.style.opacity = '1';
                 main.style.opacity = '1';
             }, 3000); // 3 seconds animation
+        });
+
+        // Dynamic search by conducteur name
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchConducteur');
+            const table = document.querySelector('table tbody');
+            searchInput.addEventListener('input', () => {
+                const filter = searchInput.value.toLowerCase();
+                const rows = table.getElementsByTagName('tr');
+                for (let i = 0; i < rows.length; i++) {
+                    const conducteurCell = rows[i].getElementsByTagName('td')[3];
+                    if (conducteurCell) {
+                        const conducteurText = conducteurCell.textContent || conducteurCell.innerText;
+                        if (conducteurText.toLowerCase().indexOf(filter) > -1) {
+                            rows[i].style.display = '';
+                        } else {
+                            rows[i].style.display = 'none';
+                        }
+                    }
+                }
+            });
         });
     </script>
 </body>

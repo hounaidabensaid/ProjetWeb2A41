@@ -4,6 +4,9 @@ require_once __DIR__.'/../../config.php';
 require_once __DIR__.'/../../controller/CovoiturageController.php';
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    // Log full request URI and parameters for debugging without breaking layout
+    error_log('Request URI: ' . $_SERVER['REQUEST_URI']);
+    error_log('GET parameters: ' . print_r($_GET, true));
     die("ID d'annonce invalide ou manquant");
 }
 

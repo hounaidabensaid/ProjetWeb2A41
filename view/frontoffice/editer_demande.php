@@ -114,6 +114,6 @@ try {
 
         <button type="submit" name="action" value="edit_demande">Modifier</button>
     </form>
-    <a href="voir_demandes.php?annonce_id=<?= htmlspecialchars($annonce_id) ?>" class="back-link">← Retour aux demandes</a>
+<a href="covoiturage.php?page=demander" class="back-link">← Retour aux demandes</a>
 </body>
 </html>

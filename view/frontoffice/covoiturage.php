@@ -5,6 +5,7 @@ $bdd = Config::getConnexion();
 if (!class_exists('Config')) {
     die("Erreur : La classe Config n'est pas disponible. Vérifiez le chemin : " . __DIR__.'/../../config.php');
 }
+
 ?>
 
 
@@ -206,7 +207,7 @@ if (isset($_GET['edit_id'])) {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        /* Annonces section */
+       /* Annonces section */
         .annonces {
             background: white;
             padding: 2rem;
@@ -248,28 +249,51 @@ if (isset($_GET['edit_id'])) {
         }
 
         .btn-edit {
-            color: #0a97b0;
-            background-color: #e6f7fa;
+            background-color: #2563eb !important; /* Blue */
+            color: white !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem !important;
+            font-weight: 600 !important;
+            border: none !important;
+            cursor: pointer !important;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease !important;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4) !important;
+            text-decoration: none !important;
+            display: inline-block !important;
+            margin-right: 0.5rem !important;
         }
 
         .btn-edit:hover {
-            background-color: #d1f1f7;
+            background-color: #1e40af !important;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.6) !important;
+            text-decoration: none !important;
+            color: white !important;
         }
 
         .btn-delete {
-            color: #ef4444;
-            background-color: #fee2e2;
-            border: 1px solid black;
+            background-color: #dc2626 !important; /* Red */
+            color: white !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem !important;
+            font-weight: 600 !important;
+            border: none !important;
+            cursor: pointer !important;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease !important;
+            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4) !important;
+            text-decoration: none !important;
+            display: inline-block !important;
         }
         
         .btn-delete:hover {
-            background-color: #fecaca;
-            border: 1px solid black;
+            background-color: #991b1b !important;
+            box-shadow: 0 4px 12px rgba(153, 27, 27, 0.6) !important;
+            text-decoration: none !important;
+            color: white !important;
         }
         
         .btn-delete:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.5);
+            outline: none !important;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.7) !important;
         }
         
         .btn-green {
@@ -304,6 +328,7 @@ if (isset($_GET['edit_id'])) {
     width: 100%; /* Occupe toute la largeur disponible */
     font-size: 1.1rem; /* Augmenter la taille de la police */
 }
+
 
 /* Pour les champs du formulaire */
 .form-input {
@@ -439,7 +464,7 @@ if (isset($_GET['edit_id'])) {
                         <input type="text" name="typeVehicule" placeholder="Type de véhicule" required value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['typeVehicule']) : '' ?>">
                     </div>
                     <div class="form-group">
-                        <input type="tel" name="telephone" placeholder="Téléphone" required pattern="[0-9]{8}" title="Veuillez entrer un numéro de téléphone composé de 8 chiffres" value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['telephone']) : '' ?>">
+                        <input type="tel" name="telephone" placeholder="Téléphone" required value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['telephone']) : '' ?>">
                         <input type="number" name="placesDisponibles" placeholder="Places disponibles" required value="<?= $editAnnonce ? htmlspecialchars($editAnnonce['placesDisponibles']) : '' ?>">
                     </div>
                     <div class="form-group">
@@ -450,24 +475,67 @@ if (isset($_GET['edit_id'])) {
             </section>
 
 <?php elseif ($page === 'demander'): ?>
-    <!-- FORMULAIRE POUR DEMANDER UN COVOITURAGE -->
+    <?php
+    // Fetch all demandes joined with their annonce info
+    try {
+        $stmt = $bdd->prepare("
+            SELECT d.id_demande, d.nom, d.prenom, d.telephone, d.email, d.places,
+                   a.villeDepart, a.villeArrivee, a.id as annonce_id
+            FROM demande d
+            JOIN `123` a ON d.id_annonce = a.id
+            WHERE d.nom = :nom
+            ORDER BY d.id_demande DESC
+        ");
+        $stmt->bindValue(':nom', $_SESSION['nom'], PDO::PARAM_STR);
+        $stmt->execute();
+        $demandes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        echo '<p>Erreur lors de la récupération des demandes : ' . htmlspecialchars($e->getMessage()) . '</p>';
+        $demandes = [];
+    }
+    ?>
     <section class="form-section">
-        <h2>📝 Demander un covoiturage</h2>
-        <form method="POST" action="traitement_demande.php">
-            <div class="form-group">
-                <input type="text" name="nom" placeholder="Nom" required>
-                <input type="text" name="prenom" placeholder="Prénom" required>
-            </div>
-            <div class="form-group">
-                <input type="text" name="villeDepart" placeholder="Ville de départ" required>
-                <input type="text" name="villeArrivee" placeholder="Ville d'arrivée" required>
-            </div>
-            <div class="form-group">
-                <input type="date" name="date" required>
-                <textarea name="message" placeholder="Message ou besoins spécifiques"></textarea>
-            </div>
-            <button type="submit" name="action" value="ajouter_demande" class="btn-submit">Envoyer la demande</button>
-        </form>
+        <h2>📋 Toutes mes demandes de covoiturage</h2>
+        <?php if (empty($demandes)): ?>
+            <p>Aucune demande pour le moment.</p>
+        <?php else: ?>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #8B0000; color: white;">
+                        <th style="padding: 0.5rem; border: 1px solid #ddd;">Ville de départ</th>
+                        <th style="padding: 0.5rem; border: 1px solid #ddd;">Ville d'arrivée</th>
+                        <th style="padding: 0.5rem; border: 1px solid #ddd;">Nom</th>
+                        <th style="padding: 0.5rem; border: 1px solid #ddd;">Prénom</th>
+                        <th style="padding: 0.5rem; border: 1px solid #ddd;">Téléphone</th>
+                        <th style="padding: 0.5rem; border: 1px solid #ddd;">Email</th>
+                        <th style="padding: 0.5rem; border: 1px solid #ddd;">Places demandées</th>
+                        <th style="padding: 0.5rem; border: 1px solid #ddd;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($demandes as $demande): ?>
+                        <tr>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd;"><?= htmlspecialchars($demande['villeDepart']) ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd;"><?= htmlspecialchars($demande['villeArrivee']) ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd;"><?= htmlspecialchars($demande['nom']) ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd;"><?= htmlspecialchars($demande['prenom']) ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd;"><?= htmlspecialchars($demande['telephone']) ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd;"><?= htmlspecialchars($demande['email']) ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd;"><?= htmlspecialchars($demande['places']) ?></td>
+                            <td style="padding: 0.5rem; border: 1px solid #ddd;">
+                                <a href="editer_demande.php?id=<?= $demande['id_demande'] ?>&annonce_id=<?= $demande['annonce_id'] ?>" class="btn-edit" style="margin-right: 0.5rem;">Modifier</a>
+                                <form method="POST" action="traitement_demande_delete.php" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette demande ?');">
+                                    <input type="hidden" name="id_demande" value="<?= $demande['id_demande'] ?>">
+                                    <input type="hidden" name="id_annonce" value="<?= $demande['annonce_id'] ?>">
+                                    <input type="hidden" name="action" value="delete_demande">
+                                    <button type="submit" class="btn-delete">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
     </section>
 
 <?php elseif ($page === 'rechercher'): ?>
@@ -500,7 +568,7 @@ $totalAnnonces = $totalAnnoncesStmt->fetchColumn();
 $totalPages = ceil($totalAnnonces / $annoncesPerPage);
 
 // Fetch annonces with limit and offset
-$reponse = $bdd->prepare('SELECT * FROM `123` WHERE date >= CURDATE() ORDER BY date DESC LIMIT :limit OFFSET :offset');
+$reponse = $bdd->prepare('SELECT *, user_id FROM `123` WHERE date >= CURDATE() ORDER BY date DESC LIMIT :limit OFFSET :offset');
 $reponse->bindValue(':limit', $annoncesPerPage, PDO::PARAM_INT);
 $reponse->bindValue(':offset', $offset, PDO::PARAM_INT);
 $reponse->execute();
@@ -508,18 +576,21 @@ $reponse->execute();
 if ($reponse->rowCount() == 0) {
     echo '<p class="text-gray-500 text-center">Aucune annonce publiée pour le moment</p>';
 } else {
-            while ($annonce = $reponse->fetch()) {
+    $currentUserId = $_SESSION['user_id'] ?? null;
+    while ($annonce = $reponse->fetch()) {
         echo '
         <div class="annonce">
             <div class="annonce-header">
                 <div class="annonce-title">
                     '.htmlspecialchars($annonce['villeDepart']).' → '.htmlspecialchars($annonce['villeArrivee']).'
                 </div>
-    <div class="annonce-actions">
-    <a href="covoiturage.php?page=proposer&edit_id='.$annonce['id'].'" class="btn-action btn-green">✏️ Modifier</a>
-        <button onclick="deleteAnnonce('.$annonce['id'].')" class="btn-action btn-delete">🗑️ Supprimer</button>
-        <a href="demande_covoiturage.php?id=' . $annonce['id'] . '" class="btn-action btn-request" style="text-decoration: none; cursor: pointer; background-color: #6b7280; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem;">🚗 Demande de covoiturage</a>
-    </div>
+                <div class="annonce-actions">';
+        if ($currentUserId !== null && $annonce['user_id'] == $currentUserId) {
+            echo '<a href="covoiturage.php?page=proposer&edit_id='.$annonce['id'].'" class="btn-action btn-green">✏️ Modifier</a>
+                <button onclick="deleteAnnonce('.$annonce['id'].')" class="btn-action btn-delete">🗑️ Supprimer</button>';
+        }
+        echo '<a href="demande_covoiturage.php?id=' . $annonce['id'] . '" class="btn-action btn-request" style="text-decoration: none; cursor: pointer; background-color: #6b7280; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem;">🚗 Demande de covoiturage</a>
+                </div>
             </div>
             <div class="annonce-details">
                 <div class="annonce-info"><strong>Date:</strong> '.htmlspecialchars($annonce['date']).'</div>
@@ -629,7 +700,10 @@ if ($reponse->rowCount() == 0) {
 
     villeDepartInput.addEventListener('input', fetchFilteredAnnonces);
     villeArriveeInput.addEventListener('input', fetchFilteredAnnonces);
-    showTotalPriceBtn.addEventListener('click', fetchTotalPrices);
+    if (showTotalPriceBtn) {
+        showTotalPriceBtn.addEventListener('click', fetchTotalPrices);
+    }
 </script>
 </body>
 </html>
+

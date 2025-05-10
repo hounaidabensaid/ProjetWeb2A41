@@ -106,7 +106,7 @@ try {
                             <a href="editer_demande.php?id=<?= $demande['id_demande'] ?>&annonce_id=<?= $annonce_id ?>" class="btn-edit">Modifier</a>
                             <form method="POST" action="traitement_demande_delete.php" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette demande ?');">
                                 <input type="hidden" name="id_demande" value="<?= $demande['id_demande'] ?>">
-                                <input type="hidden" name="id_annonce" value="<?= $annonce_id ?>">
+                                <input type="hidden" name="annonce_id" value="<?= $annonce_id ?>">
                                 <input type="hidden" name="action" value="delete_demande">
                                 <button type="submit" class="btn-delete">Supprimer</button>
                             </form>
