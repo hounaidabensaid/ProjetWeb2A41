@@ -41,7 +41,7 @@ class ReservationController {
     public function sendConfirmationSMS($phoneNumber, $userName, $dateDebut, $dateFin) {
 		    error_log("Tentative d'envoi SMS à $phoneNumber pour $userName");
 
-        $sid = "ACcf2b5e115fbdbb026c91fa4afdb8ddef";
+        $sid = "TWILIO_ACCOUNT_SID";
         $token = "2b81121c294d149384cb90a75c4c1779";
         $twilioNumber = "+17259003531";
 
