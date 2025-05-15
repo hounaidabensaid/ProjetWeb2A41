@@ -1,0 +1,176 @@
+:root {
+    --primary-color: #b30000;
+    --primary-dark: #800000;
+    --primary-light: #990000;
+    --secondary-color: #f8f9fa;
+    --text-color: #333;
+    --light-gray: #f5f5f5;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--primary-color);
+    color: white;
+    min-height: 100vh;
+    position: fixed;
+    transition: all 0.3s;
+}
+
+.sidebar-header {
+    padding: 20px;
+    background-color: var(--primary-dark);
+}
+
+.sidebar-menu {
+    padding: 0;
+    list-style: none;
+}
+
+.sidebar-menu li a {
+    display: block;
+    padding: 15px 20px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.sidebar-menu li a:hover,
+.sidebar-menu li a.active {
+    background-color: var(--primary-dark);
+}
+
+.sidebar-menu li a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    border: none;
+}
+
+.card-header {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table th {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.badge-disponible {
+    background-color: #28a745;
+}
+
+.badge-service {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-reserve {
+    background-color: #dc3545;
+}
+
+.action-btns .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        min-height: auto;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+}
+.error-message {
+color: red;
+font-size: 12px;
+margin-bottom: 5px;
+}
+
+
+.pie-chart-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+.pie-chart {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    margin: 0 auto;
+    background: conic-gradient(from 0deg, var(--chart));
+    mask: radial-gradient(circle, white 60%, transparent 61%);
+}
+
+.pie-legend {
+    list-style: none;
+    padding: 0;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pie-legend li {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+}
+
+.dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
